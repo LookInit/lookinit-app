@@ -33,7 +33,8 @@ export async function portKeyAIGatewayTogetherAI(mentionTool: string, userMessag
                 accumulatedLLMResponse += chunk.choices[0].delta.content;
             }
         }
+    } else {
+        streamable.done({ 'llmResponseEnd': true });
     }
-    // Ensure the function returns void
     return;
 }
