@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, onAuthStateChanged, signInWithPopup, signOut } from 'firebase/auth';
+import { User, onAuthStateChanged, signInWithPopup, signOut, signInWithCustomToken } from 'firebase/auth';
 import { auth, googleProvider } from '@/lib/firebase';
 
 interface AuthContextType {
@@ -18,8 +18,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Handle cross-domain sign-in from marketing site
+    const params = new URLSearchParams(window.location.search);
+    const idToken = params.get('idToken');
+    if (idToken) {
+      // Remove token from URL immediately
+      window.history.replaceState({}, '', window.location.pathname);
+      fetch('/api/auth-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken }),
+      })
+        .then((res) => res.json())
+        .then(({ customToken }) => {
+          if (customToken) return signInWithCustomToken(auth, customToken);
+        })
+        .catch(console.error);
+    }
+
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      console.log('Auth state changed:', currentUser);
       setUser(currentUser);
       setLoading(false);
     });
