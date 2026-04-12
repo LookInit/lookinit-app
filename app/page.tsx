@@ -1,8 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { isSearchLimitReached } from '@/lib/search-counter';
-import NewsTicker from './NewsTicker';
 import { ChatContainer } from '@/components/chat/chat-container';
 import { ChatInput } from '@/components/chat/chat-input';
 import { useChat } from '@/hooks/use-chat';
@@ -10,20 +8,16 @@ import { useAuth } from '@/hooks/use-auth';
 import { useModelSelection } from '@/hooks/use-model-selection';
 
 export default function HomePage() {
-  // State
-  const [searchLimitReached, setSearchLimitReached] = useState(false);
   const [file, setFile] = useState('');
   const [inputValue, setInputValue] = useState('');
   const [isExpanded, setIsExpanded] = useState(true);
-  const [showNewsTicker, setShowNewsTicker] = useState(true);
 
-  // Custom hooks
   const { user, hasSubscription } = useAuth();
-  const { 
-    messages, 
-    currentLlmResponse, 
-    setCurrentLlmResponse, 
-    handleUserMessageSubmission 
+  const {
+    messages,
+    currentLlmResponse,
+    setCurrentLlmResponse,
+    handleUserMessageSubmission
   } = useChat();
   const {
     selectedMentionTool,
@@ -34,7 +28,6 @@ export default function HomePage() {
     setShowRAG
   } = useModelSelection();
 
-  // Effects
   useEffect(() => {
     const handleSetSearchQuery = (event: Event) => {
       const customEvent = event as CustomEvent;
@@ -42,7 +35,6 @@ export default function HomePage() {
         setInputValue(customEvent.detail.query);
       }
     };
-
     window.addEventListener('set-search-query', handleSetSearchQuery);
     return () => window.removeEventListener('set-search-query', handleSetSearchQuery);
   }, []);
@@ -54,34 +46,23 @@ export default function HomePage() {
     document.dispatchEvent(event);
   }, [messages.length]);
 
-  useEffect(() => {
-    if (user && !hasSubscription) {
-      const limitReached = isSearchLimitReached(user.uid);
-      setSearchLimitReached(limitReached);
-    }
-  }, [user, hasSubscription]);
-
-  // Handlers
   const handleFollowUpClick = useCallback(async (question: string) => {
     setCurrentLlmResponse('');
     await handleUserMessageSubmission(
-      { message: question, mentionTool: null, logo: null, file: file },
+      { message: question, mentionTool: null, logo: null, file },
       user,
       hasSubscription
     );
   }, [handleUserMessageSubmission, user, hasSubscription, file]);
 
-  const handleSubmit = async (payload: { 
-    message: string; 
-    mentionTool: string | null; 
-    logo: string | null; 
-    file: string 
+  const handleSubmit = async (payload: {
+    message: string;
+    mentionTool: string | null;
+    logo: string | null;
+    file: string
   }) => {
     if (!payload.message) return;
-    
     await handleUserMessageSubmission(payload, user, hasSubscription);
-    
-    // Clear states after submission
     setShowRAG(false);
     clearSelection();
     setFile('');
@@ -91,26 +72,19 @@ export default function HomePage() {
     const fileReader = new FileReader();
     fileReader.onload = (e) => {
       const base64File = e.target?.result;
-      if (base64File) {
-        setFile(String(base64File));
-      }
+      if (base64File) setFile(String(base64File));
     };
     fileReader.readAsDataURL(file);
   };
 
   const handleInputChange = (value: string) => {
     setInputValue(value);
-    
-    if (value.trim() === '') {
-      clearSelection();
-    }
+    if (value.trim() === '') clearSelection();
   };
 
   const handleModelSelectWithRAG = (toolId: string, toolLogo: string, enableRAG: boolean) => {
     handleModelSelect(toolId, toolLogo, enableRAG);
-    if (enableRAG) {
-      setShowRAG(true);
-    }
+    if (enableRAG) setShowRAG(true);
   };
 
   return (
@@ -137,15 +111,8 @@ export default function HomePage() {
             isExpanded={isExpanded}
             setIsExpanded={setIsExpanded}
             setCurrentLlmResponse={setCurrentLlmResponse}
-            setShowNewsTicker={setShowNewsTicker}
           />
         </div>
-
-        {showNewsTicker && (
-          <div className="pb-[80px] pt-4 md:pt-10">
-            <NewsTicker />
-          </div>
-        )}
       </div>
     </div>
   );

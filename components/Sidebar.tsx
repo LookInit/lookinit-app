@@ -1,11 +1,10 @@
 'use client';
 
-import { useState } from 'react';
-import SearchHistory from '@/components/SearchHistory';
-import { Clock, NotePencil, X, UserCircle } from '@phosphor-icons/react';
+import { useSearchHistory } from '@/lib/hooks/useSearchHistory';
+import { NotePencil, X, UserCircle, SignOut, Gear } from '@phosphor-icons/react';
+import { IconTrash, IconRefresh } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
-import { ThemeToggle } from './ThemeToggle';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -13,70 +12,165 @@ interface SidebarProps {
   onSelectHistoryQuery: (query: string) => void;
 }
 
+function HistoryList({ onSelectQuery, onClose }: { onSelectQuery: (q: string) => void; onClose: () => void }) {
+  const { history, loading, error, refreshHistory, deleteHistoryItem, clearAllHistory } = useSearchHistory();
+
+  if (loading) {
+    return <p className="text-xs text-gray-400 dark:text-gray-500 px-2 py-3">Loading...</p>;
+  }
+
+  if (error) {
+    return <p className="text-xs text-red-400 px-2 py-3">Failed to load history</p>;
+  }
+
+  if (history.length === 0) {
+    return <p className="text-xs text-gray-400 dark:text-gray-500 px-2 py-3">No history yet</p>;
+  }
+
+  return (
+    <div className="flex flex-col min-h-0 flex-1">
+      {/* History header with actions */}
+      <div className="flex items-center justify-between px-2 mb-1 flex-shrink-0">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+          Recent
+        </span>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={refreshHistory}
+            className="p-1 rounded text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#3b3e41]"
+            title="Refresh"
+          >
+            <IconRefresh size={13} />
+          </button>
+          <button
+            onClick={() => window.confirm('Clear all history?') && clearAllHistory()}
+            className="p-1 rounded text-gray-400 hover:text-red-500 hover:bg-gray-100 dark:hover:bg-[#3b3e41]"
+            title="Clear all"
+          >
+            <IconTrash size={13} />
+          </button>
+        </div>
+      </div>
+
+      {/* Scrollable history items */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden pr-1 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
+        {history.map((item) => (
+          <div
+            key={item.id}
+            className="group flex items-start justify-between gap-1 px-2 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-[#3b3e41] cursor-pointer"
+            onClick={() => { onSelectQuery(item.query); onClose(); }}
+          >
+            <p className="text-sm text-gray-700 dark:text-gray-300 truncate leading-snug flex-1">
+              {item.query}
+            </p>
+            <button
+              onClick={(e) => { e.stopPropagation(); deleteHistoryItem(item.id); }}
+              className="opacity-0 group-hover:opacity-100 p-0.5 text-gray-400 hover:text-red-500 flex-shrink-0 mt-0.5"
+            >
+              <IconTrash size={13} />
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function Sidebar({ isOpen, onClose, onSelectHistoryQuery }: SidebarProps) {
-  const [showHistory, setShowHistory] = useState(false);
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   return (
     <>
       {/* Sidebar */}
-      <div className={`fixed top-0 left-0 h-full w-64 dark:bg-[#282a2c] bg-white text-white transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out z-[1000] flex flex-col`}>
-        {/* Close Button */}
-        <button onClick={onClose} className="absolute top-4 right-4 text-white z-10">
-          <X size={24} className="text-black dark:text-white hover:bg-gray-300 hover:dark:bg-[#3b3e41] rounded" />
-        </button>
+      <div className={`fixed top-0 left-0 h-full w-60 dark:bg-[#1e1f20] bg-white border-r border-gray-200 dark:border-gray-800 transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-250 ease-in-out z-[1000] flex flex-col`}>
 
-        {/* Sidebar Content - Scrollable */}
-        <div className="flex flex-col h-full overflow-hidden">
-          {/* Fixed Navigation Section */}
-          <div className="flex-shrink-0 p-5 pb-0">
-            <nav className="mt-10">
-              <a href="./" className="flex items-center gap-2 p-2 hover:dark:bg-[#3b3e41] rounded-md text-black dark:text-white hover:bg-gray-100">
-                <NotePencil size={24} className="text-black dark:text-white hover:bg-gray-300" /> New Chat
-              </a>
-
-              {user && (
-                <Link href="/account" className="flex items-center gap-2 p-2 hover:dark:bg-[#3b3e41] rounded-md text-black dark:text-white hover:bg-gray-100">
-                  <UserCircle size={24} className="text-black dark:text-white hover:bg-gray-300" /> My Account
-                </Link>
-              )}
-
-              <Link href="/pro" className="flex items-center gap-2 p-2 hover:dark:bg-[#3b3e41] rounded-md text-black dark:text-white hover:bg-gray-100">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256">
-                  <path d="M172,36H84A48.05,48.05,0,0,0,36,84v88a48.05,48.05,0,0,0,48,48h88a48.05,48.05,0,0,0,48-48V84A48.05,48.05,0,0,0,172,36ZM84,60h88a24,24,0,0,1,24,24v4H60V84A24,24,0,0,1,84,60ZM172,196H84a24,24,0,0,1-24-24V112H196v60A24,24,0,0,1,172,196Z"></path>
-                </svg>
-                Upgrade to Pro
-              </Link>
-            </nav>
+        {/* Top nav */}
+        <div className="flex-shrink-0 px-3 pt-4 pb-2">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-sm font-semibold text-gray-800 dark:text-gray-100 pl-1">lookinit</span>
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-[#3b3e41]"
+            >
+              <X size={18} className="text-gray-600 dark:text-gray-300" />
+            </button>
           </div>
 
-          {/* Search History Section - Scrollable */}
+          <a
+            href="./"
+            className="flex items-center gap-2.5 px-2 py-2 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#3b3e41] font-medium"
+          >
+            <NotePencil size={18} /> New Chat
+          </a>
+
           {user && (
-            <div className="flex-1 flex flex-col min-h-0 px-5">
-              <button
-                onClick={() => setShowHistory(!showHistory)}
-                className="flex items-center gap-2 p-2 w-full text-left hover:dark:bg-[#3b3e41] rounded-md text-black dark:text-white hover:bg-gray-100 flex-shrink-0"
-              >
-                <Clock size={24} className="text-black dark:text-white" /> Search History
-              </button>
-              
-              {showHistory && (
-                <div className="flex-1 min-h-0 mt-4 border-t border-gray-200 dark:border-gray-700 pt-4">
-                  <div className="h-full overflow-y-auto overflow-x-hidden pr-2 scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
-                    <SearchHistory onSelectQuery={onSelectHistoryQuery} />
-                  </div>
-                </div>
-              )}
-            </div>
+            <Link
+              href="/account"
+              onClick={onClose}
+              className="flex items-center gap-2.5 px-2 py-2 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#3b3e41]"
+            >
+              <UserCircle size={18} /> My Account
+            </Link>
           )}
 
-          {/* Bottom padding to ensure content doesn't get cut off */}
-          <div className="flex-shrink-0 h-4"></div>
+          <Link
+            href="/pro"
+            onClick={onClose}
+            className="flex items-center gap-2.5 px-2 py-2 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#3b3e41]"
+          >
+            <Gear size={18} /> Upgrade to Pro
+          </Link>
         </div>
+
+        <div className="mx-3 h-px bg-gray-200 dark:bg-gray-800 flex-shrink-0" />
+
+        {/* Search history */}
+        {user ? (
+          <div className="flex-1 flex flex-col min-h-0 px-3 pt-3 pb-2">
+            <HistoryList onSelectQuery={onSelectHistoryQuery} onClose={onClose} />
+          </div>
+        ) : (
+          <div className="flex-1" />
+        )}
+
+        {/* Bottom: user info + logout */}
+        {user && (
+          <>
+            <div className="mx-3 h-px bg-gray-200 dark:bg-gray-800 flex-shrink-0" />
+            <div className="flex-shrink-0 px-3 py-3">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  {user.photoURL ? (
+                    <img src={user.photoURL} alt="" className="w-7 h-7 rounded-full flex-shrink-0" />
+                  ) : (
+                    <div className="w-7 h-7 rounded-full bg-indigo-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                      {(user.displayName || user.email || 'U')[0].toUpperCase()}
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium text-gray-800 dark:text-gray-100 truncate">
+                      {user.displayName || 'User'}
+                    </p>
+                    <p className="text-[11px] text-gray-400 truncate">{user.email}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={logout}
+                  className="p-1.5 rounded-md text-gray-400 hover:text-red-500 hover:bg-gray-100 dark:hover:bg-[#3b3e41] flex-shrink-0"
+                  title="Sign out"
+                >
+                  <SignOut size={16} />
+                </button>
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
-      {/* Sidebar Overlay */}
-      {isOpen && <div className="fixed inset-0 bg-black bg-opacity-50 z-[999]" onClick={onClose} />}
+      {/* Overlay */}
+      {isOpen && (
+        <div className="fixed inset-0 bg-black/40 z-[999]" onClick={onClose} />
+      )}
     </>
   );
 }
