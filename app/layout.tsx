@@ -3,7 +3,6 @@ import { GeistMono } from 'geist/font/mono';
 import { GeistSans } from 'geist/font/sans';
 import { Analytics } from '@vercel/analytics/react';
 import { Toaster } from '@/components/ui/toaster';
-import Footer from '@/components/Footer';
 import './globals.css';
 
 import { AI } from './action';
@@ -11,6 +10,7 @@ import { Header } from '@/components/header';
 import { Providers } from '@/components/providers';
 import { AuthProvider } from '@/lib/auth-context';
 import { ThemeProvider } from '@/lib/theme-context';
+import { AuthGuard } from '@/components/AuthGuard';
 
 const meta = {
   title: 'Results, simple and smart.',
@@ -68,13 +68,14 @@ export default function RootLayout({
                 enableSystem
                 disableTransitionOnChange
               >
-                <div className="flex flex-col min-h-screen">
-                  <Header />
-                  <main className="flex flex-col flex-1 bg-muted/50 dark:bg-background px-4 pb-16">
-                    {children}
-                  </main>
-                </div>
-                <Footer />
+                <AuthGuard>
+                  <div className="flex flex-col min-h-screen">
+                    <Header />
+                    <main className="flex flex-col flex-1 bg-muted/50 dark:bg-background px-4 pb-16">
+                      {children}
+                    </main>
+                  </div>
+                </AuthGuard>
               </Providers>
             </ThemeProvider>
           </AI>
