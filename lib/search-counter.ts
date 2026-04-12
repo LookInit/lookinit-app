@@ -3,7 +3,9 @@ import { auth } from '@/lib/firebase';
 // This is a simple implementation using localStorage
 // For production, you might want to use a database
 
-export const SEARCH_LIMIT = 3; // Free searches per day
+export const SEARCH_LIMIT = 3;  // Free/anonymous searches per day (client-side UI gate)
+export const BASIC_LIMIT = 50;  // Basic plan searches per day
+export const PRO_LIMIT = 200;   // Pro plan searches per day
 
 // Helper to get current date string (YYYY-MM-DD)
 function getDateString(): string {

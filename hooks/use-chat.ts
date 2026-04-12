@@ -68,10 +68,13 @@ export function useChat() {
     // Increment search count for free users
     if (!hasSubscription && user) {
       const newCount = incrementSearchCount(user.uid);
-      if (newCount < SEARCH_LIMIT) {
+      if (newCount <= SEARCH_LIMIT) {
+        const remaining = SEARCH_LIMIT - newCount;
         toast({
           title: `Search ${newCount} of ${SEARCH_LIMIT}`,
-          description: `You have ${SEARCH_LIMIT - newCount} free searches remaining.`,
+          description: remaining > 0
+            ? `You have ${remaining} free search${remaining === 1 ? '' : 'es'} remaining.`
+            : `This is your last free search. Upgrade to continue.`,
           duration: 3000,
         });
       }
@@ -111,7 +114,7 @@ export function useChat() {
     let lastAppendedResponse = '';
 
     try {
-      const streamableValue = await myAction(payload.message, payload.mentionTool, payload.logo, payload.file);
+      const streamableValue = await myAction(payload.message, payload.mentionTool, payload.logo, payload.file, user?.uid || undefined);
       let llmResponseString = '';
 
       for await (const message of readStreamableValue(streamableValue)) {

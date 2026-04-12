@@ -84,17 +84,8 @@ export default function SignUpPage() {
       <div style={{ width: '100%', maxWidth: '400px', position: 'relative' }}>
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-          <Link href="/" style={{ textDecoration: 'none' }}>
-            <span style={{
-              fontSize: '26px',
-              fontWeight: 800,
-              background: 'linear-gradient(135deg, #fff 0%, #a5b4fc 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              letterSpacing: '-0.03em',
-            }}>
-              lookinit
-            </span>
+          <Link href="/" style={{ textDecoration: 'none', display: 'inline-block' }}>
+            <img src="/bgw.png" alt="Lookinit" style={{ height: '40px', width: 'auto' }} />
           </Link>
           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '15px', marginTop: '8px' }}>
             Create your account

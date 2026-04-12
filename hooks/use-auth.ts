@@ -7,6 +7,7 @@ import { User } from 'firebase/auth';
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [hasSubscription, setHasSubscription] = useState(false);
+  const [plan, setPlan] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -26,18 +27,21 @@ export function useAuth() {
 
           if (response.ok) {
             const data = await response.json();
-            setHasSubscription(data.subscription?.status === 'active');
+            const active = data.subscription?.status === 'active';
+            setHasSubscription(active);
+            setPlan(active ? (data.subscription?.planId || 'basic') : null);
           }
         } catch (error) {
           console.error('Error checking subscription:', error);
         }
       } else {
         setHasSubscription(false);
+        setPlan(null);
       }
     });
 
     return () => unsubscribe();
   }, []);
 
-  return { user, hasSubscription, loading };
+  return { user, hasSubscription, plan, loading };
 }
