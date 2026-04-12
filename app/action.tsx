@@ -11,14 +11,14 @@ import { streamingChatCompletion } from './tools/streamingChatCompletion';
 import { checkRateLimit } from './tools/rateLimiting';
 import { lookupTool } from './tools/mentionTools';
 
-async function myAction(userMessage: string, mentionTool: string | null, logo: string | null, file: string): Promise<any> {
+async function myAction(userMessage: string, mentionTool: string | null, logo: string | null, file: string, userId?: string): Promise<any> {
   "use server";
   const streamable = createStreamableValue({});
 
   (async () => {
     try {
       // Rate limiting and semantic cache apply to ALL requests
-      const allowed = await checkRateLimit(streamable);
+      const allowed = await checkRateLimit(streamable, userId);
       if (!allowed) return;
 
       await initializeSemanticCache();

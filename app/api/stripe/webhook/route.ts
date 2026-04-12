@@ -1,8 +1,9 @@
 export const runtime = "nodejs";
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { updateUserSubscriptionStatus } from '@/lib/db';
-import { getAdminAuth, getAdminDb } from '@/lib/firebase-admin';
+import { upsertUserSubscription, updateUserSubscriptionStatus } from '@/lib/db';
+import { Redis } from '@upstash/redis';
+import { subTierKey } from '@/lib/subscription-tiers';
 
 // Check if we're in the build phase
 const isBuildPhase = process.env.NODE_ENV === 'production' && process.env.NEXT_PHASE === 'phase-production-build';
@@ -37,31 +38,45 @@ export async function POST(request: Request) {
   try {
     switch (event.type) {
       case 'customer.subscription.created':
-      case 'customer.subscription.updated':
+      case 'customer.subscription.updated': {
         const subscription = event.data.object as Stripe.Subscription;
-        
-        // Get the user ID from metadata (stored when subscription was created)
-        const userId = await getUserIdFromSubscription(subscription);
-        
+        const { userId, planId } = await getMetadataFromSubscription(subscription);
+
         if (userId) {
-          await updateUserSubscriptionStatus(
-            userId, 
-            subscription.status,
-            subscription.current_period_end
-          );
+          const resolvedPlanId = planId || 'basic';
+          const redis = Redis.fromEnv();
+          await Promise.all([
+            upsertUserSubscription({
+              userId,
+              customerId: subscription.customer as string,
+              subscriptionId: subscription.id,
+              status: subscription.status,
+              planId: resolvedPlanId,
+              currentPeriodEnd: subscription.current_period_end,
+              createdAt: subscription.created,
+            }),
+            // Cache tier in Redis for fast edge-compatible rate limit lookups
+            subscription.status === 'active'
+              ? redis.set(subTierKey(userId), resolvedPlanId)
+              : redis.del(subTierKey(userId)),
+          ]);
         }
         break;
-        
-      case 'customer.subscription.deleted':
+      }
+
+      case 'customer.subscription.deleted': {
         const deletedSubscription = event.data.object as Stripe.Subscription;
-        
-        // Get the user ID from metadata
-        const deletedUserId = await getUserIdFromSubscription(deletedSubscription);
-        
+        const { userId: deletedUserId } = await getMetadataFromSubscription(deletedSubscription);
+
         if (deletedUserId) {
-          await updateUserSubscriptionStatus(deletedUserId, 'canceled');
+          const redis = Redis.fromEnv();
+          await Promise.all([
+            updateUserSubscriptionStatus(deletedUserId, 'canceled'),
+            redis.del(subTierKey(deletedUserId)),
+          ]);
         }
         break;
+      }
         
       default:
         console.log(`Unhandled event type: ${event.type}`);
@@ -77,27 +92,36 @@ export async function POST(request: Request) {
   }
 }
 
-// Helper function to get userId from subscription
-async function getUserIdFromSubscription(subscription: Stripe.Subscription): Promise<string | null> {
+// Helper to extract userId and planId from a subscription via metadata or linked checkout session
+async function getMetadataFromSubscription(
+  subscription: Stripe.Subscription
+): Promise<{ userId: string | null; planId: string | null }> {
   try {
-    // First check if metadata exists on the subscription
+    // Check subscription metadata first
     if (subscription.metadata?.userId) {
-      return subscription.metadata.userId;
+      return {
+        userId: subscription.metadata.userId,
+        planId: subscription.metadata.planId || null,
+      };
     }
-    
-    // If not, try to get it from the checkout session that created this subscription
+
+    // Fall back to the checkout session that created this subscription
     const sessions = await stripe.checkout.sessions.list({
       subscription: subscription.id,
       expand: ['data.metadata'],
     });
-    
-    if (sessions.data.length > 0 && sessions.data[0].metadata?.userId) {
-      return sessions.data[0].metadata.userId;
+
+    if (sessions.data.length > 0) {
+      const session = sessions.data[0];
+      return {
+        userId: session.metadata?.userId || null,
+        planId: session.metadata?.planId || null,
+      };
     }
-    
-    return null;
+
+    return { userId: null, planId: null };
   } catch (error) {
-    console.error('Error getting userId from subscription:', error);
-    return null;
+    console.error('Error getting metadata from subscription:', error);
+    return { userId: null, planId: null };
   }
 }

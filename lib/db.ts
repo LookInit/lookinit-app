@@ -60,25 +60,39 @@ export async function getSubscriptionIdFromUserId(userId: string): Promise<strin
   return subscription?.subscriptionId || null;
 }
 
+// Upserts a subscription document at subscriptions/{userId} (the path getUserSubscription reads from)
+export async function upsertUserSubscription(data: Partial<UserSubscription> & { userId: string }): Promise<void> {
+  try {
+    const db = await getAdminDb();
+    if (!db) return;
+    await db.collection('subscriptions').doc(data.userId).set(
+      { ...data, updatedAt: Date.now() },
+      { merge: true }
+    );
+  } catch (error) {
+    console.error('Error upserting subscription:', error);
+  }
+}
+
 export async function updateUserSubscriptionStatus(
-  userId: string, 
-  status: string, 
+  userId: string,
+  status: string,
   currentPeriodEnd?: number
 ): Promise<void> {
   try {
     const db = await getAdminDb();
     if (!db) return;
-    
+
     const data: Partial<UserSubscription> = {
       status,
       updatedAt: Date.now(),
     };
-    
+
     if (currentPeriodEnd) {
       data.currentPeriodEnd = currentPeriodEnd;
     }
-    
-    await db.collection('subscriptions').doc(userId).update(data);
+
+    await db.collection('subscriptions').doc(userId).set(data, { merge: true });
   } catch (error) {
     console.error('Error updating subscription status:', error);
   }
