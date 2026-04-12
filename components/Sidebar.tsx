@@ -2,6 +2,7 @@
 
 import { useSearchHistory } from '@/lib/hooks/useSearchHistory';
 import { NotePencil, X, UserCircle, SignOut, Crown, Sun, Moon, Monitor } from '@phosphor-icons/react';
+import Image from 'next/image';
 import { IconTrash, IconRefresh } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
@@ -89,7 +90,10 @@ export function Sidebar({ isOpen, onClose, onSelectHistoryQuery }: SidebarProps)
         {/* Top nav */}
         <div className="flex-shrink-0 px-3 pt-4 pb-2">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-sm font-semibold text-gray-800 dark:text-gray-100 pl-1">lookinit</span>
+            <a href="/">
+              <Image src="/images/bg.png" alt="Lookinit" width={90} height={32} className="dark:hidden" style={{ height: '28px', width: 'auto' }} priority />
+              <Image src="/images/bgw.png" alt="Lookinit" width={90} height={32} className="hidden dark:block" style={{ height: '28px', width: 'auto' }} priority />
+            </a>
             <button
               onClick={onClose}
               className="p-1.5 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-[#3b3e41]"
