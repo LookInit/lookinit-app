@@ -22,7 +22,6 @@ interface ChatInputProps {
   isExpanded: boolean;
   setIsExpanded: (expanded: boolean) => void;
   setCurrentLlmResponse: (response: string) => void;
-  setShowNewsTicker: (show: boolean) => void;
 }
 
 export function ChatInput({
@@ -38,7 +37,6 @@ export function ChatInput({
   isExpanded,
   setIsExpanded,
   setCurrentLlmResponse,
-  setShowNewsTicker
 }: ChatInputProps) {
   const { formRef, onKeyDown } = useEnterSubmit();
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -46,8 +44,7 @@ export function ChatInput({
   const handleFormSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!inputValue.trim()) return;
-    
-    setShowNewsTicker(false);
+
     setIsExpanded(false);
     setCurrentLlmResponse('');
     

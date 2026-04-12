@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useActions, readStreamableValue } from 'ai/rsc';
 import { type AI } from '@/app/action';
 import { Message, StreamMessage } from '@/types/chat';
@@ -8,55 +8,24 @@ import { auth } from '@/lib/firebase';
 import { incrementSearchCount, isSearchLimitReached, SEARCH_LIMIT } from '@/lib/search-counter';
 import { useToast } from '@/components/ui/use-toast';
 import { User } from 'firebase/auth';
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
 
-// Get the Firestore instance using the same app as auth
-const getDb = () => {
-  try {
-    return getFirestore(auth.app);
-  } catch (error) {
-    console.error('❌ Error getting Firestore instance:', error);
-    return null;
-  }
-};
-
-// Add saveSearch function directly in this file
-const saveSearch = async (searchQuery: string): Promise<string | null> => {
+// Save search via API (single path — avoids duplicate saves)
+const saveSearch = async (query: string): Promise<void> => {
   const user = auth.currentUser;
-  
-  if (!user || !searchQuery?.trim()) {
-    console.log('❌ Cannot save search: no user or empty query');
-    return null;
-  }
-  
-  const db = getDb();
-  if (!db) {
-    console.error('❌ Firestore not available');
-    return null;
-  }
-  
+  if (!user || !query?.trim()) return;
+
   try {
-    const historyItem = {
-      userId: user.uid,
-      query: searchQuery.trim(),
-      timestamp: Date.now()
-    };
-    
-    console.log('💾 Saving search to history:', searchQuery);
-    const docRef = await addDoc(collection(db, 'searchHistory'), historyItem);
-    console.log('✅ Search history saved with ID:', docRef.id);
-    return docRef.id;
-    
-  } catch (error: any) {
-    console.error('❌ Error saving search to history:', error);
-    
-    // Log specific Firebase errors for debugging
-    if (error.code) {
-      console.error('Firebase error code:', error.code);
-      console.error('Firebase error message:', error.message);
-    }
-    
-    return null;
+    const token = await user.getIdToken();
+    await fetch('/api/search-history', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ query: query.trim() }),
+    });
+  } catch {
+    // Silent — non-critical background operation
   }
 };
 
@@ -65,55 +34,17 @@ export function useChat() {
   const [currentLlmResponse, setCurrentLlmResponse] = useState('');
   const { myAction } = useActions<typeof AI>();
   const { toast } = useToast();
-  
-  // Track which messages have already been saved to prevent duplicates
-  const savedMessageIds = useRef<Set<number>>(new Set());
 
-  // Save search history when a message is completed
-  useEffect(() => {
-    const latestMessage = messages[messages.length - 1];
-    
-    // Check if we have a completed user message that hasn't been saved yet
-    if (latestMessage && 
-        latestMessage.type === 'userMessage' &&
-        !latestMessage.isStreaming && 
-        latestMessage.content && 
-        latestMessage.userMessage &&
-        !savedMessageIds.current.has(latestMessage.id)) {
-      
-      console.log('🎯 Detected completed message, saving to history:', latestMessage.userMessage);
-      
-      // Mark this message as being processed
-      savedMessageIds.current.add(latestMessage.id);
-      
-      // Save to search history
-      const saveCompletedSearch = async () => {
-        try {
-          const searchId = await saveSearch(latestMessage.userMessage);
-          if (searchId) {
-            console.log('✅ Search saved to history successfully');
-          }
-        } catch (error) {
-          console.error('❌ Failed to save search to history:', error);
-          // Remove from saved set if save failed so it can be retried
-          savedMessageIds.current.delete(latestMessage.id);
-        }
-      };
-      
-      saveCompletedSearch();
-    }
-  }, [messages]);
+  // Track saved message IDs to prevent duplicate saves within a session
+  const savedMessageIds = useRef<Set<number>>(new Set());
 
   const handleUserMessageSubmission = useCallback(async (
     payload: { message: string; mentionTool: string | null; logo: string | null; file: string },
     user: User | null,
     hasSubscription: boolean
   ) => {
-    console.log('🚀 Starting search for:', payload.message);
-
     // Search limit check
     if (!hasSubscription && isSearchLimitReached(user?.uid)) {
-      console.log('🚫 Search limit reached');
       const paymentPromptMessage = {
         id: Date.now(),
         type: 'paymentPrompt',
@@ -134,9 +65,9 @@ export function useChat() {
       return;
     }
 
-    // Increment search count
+    // Increment search count for free users
     if (!hasSubscription && user) {
-      const newCount = incrementSearchCount(user?.uid);
+      const newCount = incrementSearchCount(user.uid);
       if (newCount < SEARCH_LIMIT) {
         toast({
           title: `Search ${newCount} of ${SEARCH_LIMIT}`,
@@ -170,20 +101,26 @@ export function useChat() {
     };
 
     setMessages(prevMessages => [...prevMessages, newMessage]);
-    
-    let lastAppendedResponse = "";
-    
+
+    // Save to history once per message
+    if (!savedMessageIds.current.has(newMessageId)) {
+      savedMessageIds.current.add(newMessageId);
+      saveSearch(payload.message);
+    }
+
+    let lastAppendedResponse = '';
+
     try {
       const streamableValue = await myAction(payload.message, payload.mentionTool, payload.logo, payload.file);
-      let llmResponseString = "";
+      let llmResponseString = '';
 
       for await (const message of readStreamableValue(streamableValue)) {
         const typedMessage = message as StreamMessage;
-        
+
         setMessages((prevMessages) => {
           const messagesCopy = [...prevMessages];
           const messageIndex = messagesCopy.findIndex(msg => msg.id === newMessageId);
-          
+
           if (messageIndex !== -1) {
             const currentMessage = messagesCopy[messageIndex];
 
@@ -242,27 +179,29 @@ export function useChat() {
           }
           return messagesCopy;
         });
-        
+
         if (typedMessage.llmResponse) {
           llmResponseString += typedMessage.llmResponse;
           setCurrentLlmResponse(llmResponseString);
         }
       }
-      
     } catch (error) {
-      console.error("❌ Error during search:", error);
+      console.error('Search error:', error);
     }
-    
   }, [myAction, toast]);
 
-  const handleFollowUpClick = useCallback(async (question: string, user: User | null, hasSubscription: boolean, file: string) => {
+  const handleFollowUpClick = useCallback(async (
+    question: string,
+    user: User | null,
+    hasSubscription: boolean,
+    file: string
+  ) => {
     setCurrentLlmResponse('');
-    await handleUserMessageSubmission({ 
-      message: question, 
-      mentionTool: null, 
-      logo: null, 
-      file: file 
-    }, user, hasSubscription);
+    await handleUserMessageSubmission(
+      { message: question, mentionTool: null, logo: null, file },
+      user,
+      hasSubscription
+    );
   }, [handleUserMessageSubmission]);
 
   return {
@@ -271,6 +210,6 @@ export function useChat() {
     currentLlmResponse,
     setCurrentLlmResponse,
     handleUserMessageSubmission,
-    handleFollowUpClick
+    handleFollowUpClick,
   };
 }

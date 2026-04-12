@@ -1,158 +1,176 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { useToast } from '@/components/ui/use-toast';
-import { resetSearchCount } from '@/lib/search-counter';
-import { useAuth } from '@/lib/auth-context'; // Use the auth context
-import { UserAvatar } from '@/components/UserAvatar'; // Import the avatar component
+import { useAuth } from '@/lib/auth-context';
+import { UserAvatar } from '@/components/UserAvatar';
+import { Crown, SignOut, ArrowLeft } from '@phosphor-icons/react';
+import Link from 'next/link';
 
 export default function AccountPage() {
-  const { user } = useAuth(); // Use auth context instead of local state
+  const { user, logout } = useAuth();
   const [subscription, setSubscription] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
+  const [portalLoading, setPortalLoading] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      const fetchSubscription = async () => {
-        try {
-          // Fetch subscription data from your API
-          const response = await fetch('/api/stripe/get-subscription', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ userId: user.uid }),
-          });
-          
-          if (response.ok) {
-            const data = await response.json();
-            setSubscription(data.subscription);
-            
-            // If user has an active subscription, reset their search count
-            if (data.subscription?.status === 'active') {
-              resetSearchCount(user.uid);
-            }
-          }
-        } catch (error) {
-          console.error('Error fetching subscription:', error);
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      fetchSubscription();
-    } else {
-      setLoading(false);
-    }
+    if (!user) { setLoading(false); return; }
+    fetch('/api/stripe/get-subscription', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: user.uid }),
+    })
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => setSubscription(data?.subscription ?? null))
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, [user]);
 
   const handleManageSubscription = async () => {
+    if (!user) return;
+    setPortalLoading(true);
     try {
-      setLoading(true);
-      const response = await fetch('/api/stripe/create-portal-session', {
+      const res = await fetch('/api/stripe/create-portal-session', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId: user?.uid }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.uid }),
       });
-      
-      const data = await response.json();
-      
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error('Failed to create portal session');
-      }
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to open subscription management portal',
-        variant: 'destructive',
-      });
-      console.error('Error creating portal session:', error);
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+    } catch {
+      /* ignore */
     } finally {
-      setLoading(false);
+      setPortalLoading(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div>
-        <div className="container mx-auto py-10 text-center">
-          <p>Loading account information...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div>
-        <div className="container mx-auto py-10 text-center">
-          <h1 className="text-2xl font-bold mb-4">Account</h1>
-          <p className="mb-4">Please sign in to view your account details.</p>
-        </div>
-      </div>
-    );
-  }
+  const isActive = subscription?.status === 'active';
 
   return (
-    <div>
-      <div className="container mx-auto py-10 px-4">
-        <h1 className="text-2xl font-bold mb-6">Account</h1>
-        
-        <div className="bg-white dark:bg-[#282a2c] rounded-lg shadow-lg p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">Profile</h2>
-          <div className="flex items-center mb-4">
-            {/* Replace the img tag with UserAvatar component */}
-            <div className="mr-4">
-              <UserAvatar user={user} size={64} />
-            </div>
-            <div>
-              <p className="font-medium">{user.displayName || 'User'}</p>
-              <p className="text-gray-600 dark:text-gray-400">{user.email}</p>
-              {/* Add some additional user info */}
-              <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
-                Member since {new Date(user.metadata.creationTime || '').toLocaleDateString()}
-              </p>
-            </div>
+    <div style={{
+      minHeight: '100vh',
+      background: 'var(--background)',
+      padding: '32px 16px',
+    }}>
+      <div style={{ maxWidth: '480px', margin: '0 auto' }}>
+        {/* Back */}
+        <Link href="/" style={{
+          display: 'inline-flex', alignItems: 'center', gap: '6px',
+          fontSize: '13px', color: 'rgba(128,128,128,0.8)',
+          textDecoration: 'none', marginBottom: '32px',
+        }}>
+          <ArrowLeft size={14} /> Back to search
+        </Link>
+
+        {loading ? (
+          <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '80px' }}>
+            <div style={{
+              width: '24px', height: '24px',
+              border: '2px solid rgba(128,128,128,0.2)',
+              borderTopColor: '#6366f1',
+              borderRadius: '50%',
+              animation: 'spin 0.7s linear infinite',
+            }} />
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
           </div>
-        </div>
-        
-        <div className="bg-white dark:bg-[#282a2c] rounded-lg shadow-lg p-6">
-          <h2 className="text-xl font-semibold mb-4">Subscription</h2>
-          
-          {subscription ? (
-            <div>
-              <div className="mb-4">
-                <p className="font-medium">Plan: <span className="capitalize">{subscription.plan || 'Basic'}</span></p>
-                <p className="font-medium">Status: <span className="capitalize">{subscription.status || 'Unknown'}</span></p>
-                {subscription.currentPeriodEnd && (
-                  <p className="font-medium">
-                    Next billing date: {new Date(subscription.currentPeriodEnd * 1000).toLocaleDateString()}
+        ) : !user ? (
+          <p className="text-center text-gray-500">Not signed in.</p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+
+            {/* Profile card */}
+            <div className="bg-white dark:bg-[#1e1f20] border border-gray-200 dark:border-gray-800 rounded-2xl p-6">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <UserAvatar user={user} size={56} />
+                <div style={{ minWidth: 0 }}>
+                  <p style={{ fontWeight: 600, fontSize: '16px' }} className="text-gray-900 dark:text-gray-100 truncate">
+                    {user.displayName || 'User'}
                   </p>
-                )}
+                  <p style={{ fontSize: '13px', marginTop: '2px' }} className="text-gray-500 dark:text-gray-400 truncate">
+                    {user.email}
+                  </p>
+                  <p style={{ fontSize: '12px', marginTop: '4px' }} className="text-gray-400 dark:text-gray-600">
+                    Member since {new Date(user.metadata.creationTime || '').toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                  </p>
+                </div>
               </div>
-              
-              <Button onClick={handleManageSubscription} disabled={loading}>
-                {loading ? 'Loading...' : 'Manage Subscription'}
-              </Button>
             </div>
-          ) : (
-            <div>
-              <p className="mb-4">You don't have an active subscription.</p>
-              <Button 
-                onClick={() => window.location.href = '/pro'} 
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                Upgrade to Pro
-              </Button>
+
+            {/* Subscription card */}
+            <div className="bg-white dark:bg-[#1e1f20] border border-gray-200 dark:border-gray-800 rounded-2xl p-6">
+              <h2 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '16px' }} className="text-gray-900 dark:text-gray-100">
+                Subscription
+              </h2>
+
+              {isActive ? (
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+                    <div style={{
+                      background: 'rgba(99,102,241,0.12)', borderRadius: '8px',
+                      padding: '6px', display: 'flex',
+                    }}>
+                      <Crown size={18} style={{ color: '#6366f1' }} />
+                    </div>
+                    <div>
+                      <p style={{ fontWeight: 600, fontSize: '14px' }} className="text-gray-900 dark:text-gray-100 capitalize">
+                        {subscription.plan || 'Pro'} plan
+                      </p>
+                      <p style={{ fontSize: '12px', marginTop: '1px' }} className="text-gray-500">
+                        Renews {new Date(subscription.currentPeriodEnd * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </p>
+                    </div>
+                    <span style={{
+                      marginLeft: 'auto', fontSize: '11px', fontWeight: 600,
+                      background: 'rgba(34,197,94,0.12)', color: '#16a34a',
+                      padding: '2px 8px', borderRadius: '100px',
+                    }}>
+                      Active
+                    </span>
+                  </div>
+                  <button
+                    onClick={handleManageSubscription}
+                    disabled={portalLoading}
+                    className="w-full text-sm font-medium py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#282a2c] transition-colors disabled:opacity-60"
+                  >
+                    {portalLoading ? 'Opening portal...' : 'Manage subscription'}
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  <p style={{ fontSize: '13px', marginBottom: '16px' }} className="text-gray-500 dark:text-gray-400">
+                    You&apos;re on the free plan — 3 searches per day.
+                  </p>
+                  <a
+                    href="https://lookinit.com/pricing"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                      background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                      color: '#fff', borderRadius: '12px',
+                      padding: '11px', fontSize: '14px', fontWeight: 600,
+                      textDecoration: 'none',
+                    }}
+                  >
+                    <Crown size={16} /> Upgrade to Pro
+                  </a>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+
+            {/* Sign out */}
+            <button
+              onClick={logout}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                padding: '11px', borderRadius: '12px', fontSize: '14px', fontWeight: 500,
+                cursor: 'pointer', border: '1px solid rgba(239,68,68,0.2)',
+                background: 'rgba(239,68,68,0.05)', color: '#ef4444',
+              }}
+            >
+              <SignOut size={16} /> Sign out
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
