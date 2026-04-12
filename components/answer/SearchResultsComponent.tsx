@@ -101,7 +101,7 @@ const SearchResultsComponent = ({ searchResults }: { searchResults: SearchResult
                         <div className="w-full sm:w-full md:w-1/4 p-2">
                             <div
                                 onClick={toggleExpansion}
-                                className="flex items-center space-x-2 dark:dark:bg-[#3b3e41] bg-gray-100 p-3 rounded-lg cursor-pointer h-12 justify-center"
+                                className="flex items-center space-x-2 dark:bg-[#3b3e41] bg-gray-100 p-3 rounded-lg cursor-pointer h-12 justify-center"
                             >
                                 {!isExpanded ? (
                                     <>
