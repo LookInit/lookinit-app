@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Sidebar as SidebarIcon, GoogleLogo, UserCircle, Sun, Moon, Monitor } from '@phosphor-icons/react';
+import { Sidebar as SidebarIcon, UserCircle, Sun, Moon, Monitor } from '@phosphor-icons/react';
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
@@ -17,7 +16,7 @@ export function Header() {
   const [hasMessages, setHasMessages] = useState(false);
 
   // Use the auth hook instead of managing state locally
-  const { user, loading, signInWithGoogle, logout } = useAuth();
+  const { user, loading, logout } = useAuth();
   const { theme, setTheme, actualTheme } = useTheme();
 
   const handleSelectHistoryQuery = (query: string) => {
@@ -25,15 +24,6 @@ export function Header() {
       detail: { query }
     }));
     setIsSidebarOpen(false);
-  };
-
-  const handleGoogleSignIn = async () => {
-    try {
-      await signInWithGoogle();
-    } catch (error) {
-      // Handle error (show toast, etc.)
-      console.error('Sign-in failed:', error);
-    }
   };
 
   const handleSignOut = async () => {
@@ -228,11 +218,12 @@ export function Header() {
               </DropdownMenu.Portal>
             </DropdownMenu.Root>
           ) : (
-            <Button variant="ghost" className="flex items-center gap-1" onClick={handleGoogleSignIn}>
-              <GoogleLogo size={18} />
-              <span className="hidden sm:inline">Login with Google</span>
-              <span className="sm:hidden">Login</span>
-            </Button>
+            <Link
+              href="/signin"
+              className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-black dark:text-white hover:bg-gray-200 dark:hover:bg-[#282a2c] rounded-md transition-colors"
+            >
+              Sign in
+            </Link>
           )}
         </div>
       </header>
