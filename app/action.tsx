@@ -17,58 +17,59 @@ async function myAction(userMessage: string, mentionTool: string | null, logo: s
 
   (async () => {
     try {
+      // Rate limiting and semantic cache apply to ALL requests
+      const allowed = await checkRateLimit(streamable);
+      if (!allowed) return;
+
+      await initializeSemanticCache();
+      const cachedData = await getFromSemanticCache(userMessage);
+      if (cachedData) {
+        streamable.update({ cachedData });
+        streamable.done();
+        return;
+      }
+
       if (mentionTool) {
-    await checkRateLimit(streamable);
+        // Mention tool path (@model searches)
+        await lookupTool(mentionTool, userMessage, streamable, file);
+      } else {
+        // Regular search path
+        const [images, sources, videos, conditionalFunctionCallUI] = await Promise.all([
+          getImages(userMessage),
+          getSearchResults(userMessage),
+          getVideos(userMessage),
+          functionCalling(userMessage),
+        ]);
 
-    await initializeSemanticCache();
+        streamable.update({ searchResults: sources, images, videos });
 
-    const cachedData = await getFromSemanticCache(userMessage);
-    if (cachedData) {
-      streamable.update({ cachedData });
-      return;
-    }
+        if (config.useFunctionCalling) {
+          streamable.update({ conditionalFunctionCallUI });
+        }
 
-    if (mentionTool) {
-      await lookupTool(mentionTool, userMessage, streamable, file);
-    }
-} else {
-    const [images, sources, videos, conditionalFunctionCallUI] = await Promise.all([
-      getImages(userMessage),
-      getSearchResults(userMessage),
-      getVideos(userMessage),
-      functionCalling(userMessage),
-    ]);
+        const html = await get10BlueLinksContents(sources);
+        const vectorResults = await processAndVectorizeContent(html, userMessage);
+        const accumulatedLLMResponse = await streamingChatCompletion(userMessage, vectorResults, streamable);
+        const followUp = await relevantQuestions(sources, userMessage);
 
-    streamable.update({ searchResults: sources, images, videos });
+        streamable.update({ followUp });
 
-    if (config.useFunctionCalling) {
-      streamable.update({ conditionalFunctionCallUI });
-    }
-
-    const html = await get10BlueLinksContents(sources);
-    const vectorResults = await processAndVectorizeContent(html, userMessage);
-    const accumulatedLLMResponse = await streamingChatCompletion(userMessage, vectorResults, streamable);
-    const followUp = await relevantQuestions(sources, userMessage);
-
-    streamable.update({ followUp });
-
-    setInSemanticCache(userMessage, {
-      searchResults: sources,
-      images,
-      videos,
-      conditionalFunctionCallUI: config.useFunctionCalling ? conditionalFunctionCallUI : undefined,
-      llmResponse: accumulatedLLMResponse,
-      followUp,
-      semanticCacheKey: userMessage
-    });
-
-    }
+        setInSemanticCache(userMessage, {
+          searchResults: sources,
+          images,
+          videos,
+          conditionalFunctionCallUI: config.useFunctionCalling ? conditionalFunctionCallUI : undefined,
+          llmResponse: accumulatedLLMResponse,
+          followUp,
+          semanticCacheKey: userMessage,
+        });
+      }
     } catch (error) {
       console.error('Action error:', error);
       try {
         streamable.done({ llmResponseEnd: true });
-      } catch (closeError) {
-        console.error('Error closing stream:', closeError);
+      } catch {
+        // stream already closed
       }
     }
   })();

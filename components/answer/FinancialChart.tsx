@@ -23,6 +23,7 @@ function FinancialChart({ ticker }: { ticker: string }) {
     script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
     script.type = "text/javascript";
     script.async = true;
+    const containerId = container.current?.id || '';
     script.innerHTML = `
       {
         "autosize": true,
@@ -36,7 +37,7 @@ function FinancialChart({ ticker }: { ticker: string }) {
         "allow_symbol_change": true,
         "calendar": false,
         "support_host": "https://www.tradingview.com",
-        "container_id": "${container.current?.id}"
+        "container_id": "${containerId}"
       }
     `;
 
@@ -52,7 +53,7 @@ function FinancialChart({ ticker }: { ticker: string }) {
   }, []);
 
   return (
-    <div className="my-5 tradingview-widget-container" ref={container} style={styles.container}>
+    <div id={`tv-chart-${ticker}`} className="my-5 tradingview-widget-container" ref={container} style={styles.container}>
       <div className="tradingview-widget-copyright">
         <a href="https://www.tradingview.com/" rel="noopener nofollow" target="_blank">
           <span className="blue-text">Track all markets on TradingView</span>

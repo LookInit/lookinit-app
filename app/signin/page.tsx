@@ -54,6 +54,7 @@ export default function SignInPage() {
       router.replace('/');
     } catch (err: any) {
       setError(err.message || 'Google sign-in failed');
+    } finally {
       setGoogleLoading(false);
     }
   }
