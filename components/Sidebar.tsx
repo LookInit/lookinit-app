@@ -1,7 +1,7 @@
 'use client';
 
 import { useSearchHistory } from '@/lib/hooks/useSearchHistory';
-import { NotePencil, X, UserCircle, SignOut, Gear } from '@phosphor-icons/react';
+import { NotePencil, X, UserCircle, SignOut, Crown } from '@phosphor-icons/react';
 import { IconTrash, IconRefresh } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
@@ -113,13 +113,15 @@ export function Sidebar({ isOpen, onClose, onSelectHistoryQuery }: SidebarProps)
             </Link>
           )}
 
-          <Link
-            href="/pro"
+          <a
+            href="https://lookinit.com/pricing"
+            target="_blank"
+            rel="noopener noreferrer"
             onClick={onClose}
-            className="flex items-center gap-2.5 px-2 py-2 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#3b3e41]"
+            className="flex items-center gap-2.5 px-2 py-2 rounded-md text-sm text-indigo-500 dark:text-indigo-400 hover:bg-gray-100 dark:hover:bg-[#3b3e41] font-medium"
           >
-            <Gear size={18} /> Upgrade to Pro
-          </Link>
+            <Crown size={18} /> Upgrade to Pro
+          </a>
         </div>
 
         <div className="mx-3 h-px bg-gray-200 dark:bg-gray-800 flex-shrink-0" />
