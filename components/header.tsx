@@ -1,13 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Sidebar as SidebarIcon, UserCircle, Sun, Moon, Monitor } from '@phosphor-icons/react';
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { Sidebar as SidebarIcon } from '@phosphor-icons/react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { UserAvatar } from './UserAvatar';
 import { Sidebar } from './Sidebar';
-import { useTheme } from '@/lib/theme-context';
 
 export function Header() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -16,8 +14,7 @@ export function Header() {
   const [hasMessages, setHasMessages] = useState(false);
 
   // Use the auth hook instead of managing state locally
-  const { user, loading, logout } = useAuth();
-  const { theme, setTheme, actualTheme } = useTheme();
+  const { user, loading } = useAuth();
 
   const handleSelectHistoryQuery = (query: string) => {
     window.dispatchEvent(new CustomEvent('set-search-query', {
@@ -26,30 +23,8 @@ export function Header() {
     setIsSidebarOpen(false);
   };
 
-  const handleSignOut = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      // Handle error
-      console.error('Sign-out failed:', error);
-    }
-  };
-
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
-  };
-
-  const getThemeIcon = (themeType: string) => {
-    switch (themeType) {
-      case 'light':
-        return <Sun size={18} className="text-orange-500" />;
-      case 'dark':
-        return <Moon size={18} className="text-yellow-500" />;
-      case 'system':
-        return <Monitor size={18} className="text-gray-500" />;
-      default:
-        return <Monitor size={18} className="text-gray-500" />;
-    }
   };
 
   useEffect(() => {
@@ -111,112 +86,15 @@ export function Header() {
         {/* Login/Signup / Profile Dropdown */}
         <div className="ml-auto flex items-center gap-2">
           {loading ? (
-            <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
+            <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
           ) : user ? (
-            <DropdownMenu.Root>
-              <DropdownMenu.Trigger asChild>
-                <button className="focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-full">
-                  <UserAvatar user={user} size={40} />
-                </button>
-              </DropdownMenu.Trigger>
-
-              <DropdownMenu.Portal>
-                <DropdownMenu.Content
-                  align="end"
-                  className="w-48 bg-white dark:bg-[#282a2c] border border-gray-200 dark:border-gray-700 rounded-md shadow-lg p-2 z-[1000] mt-1"
-                >
-                  <div className="p-2 border-b border-gray-200 dark:border-gray-700 mb-2">
-                    <div className="flex flex-col">
-                      <span className="text-sm font-medium text-black dark:text-white">
-                        {user.displayName || 'User'}
-                      </span>
-                      <span className="text-xs text-gray-500 dark:text-gray-400">
-                        {user.email}
-                      </span>
-                    </div>
-                  </div>
-
-                  <DropdownMenu.Item className="p-2 hover:dark:bg-[#3b3e41] hover:bg-gray-300 rounded-md cursor-pointer">
-                    <Link href="/account" className="flex items-center gap-2 text-black dark:text-white w-full">
-                      <UserCircle size={18} />
-                      My Account
-                    </Link>
-                  </DropdownMenu.Item>
-
-                  <DropdownMenu.Item className="p-2 hover:dark:bg-[#3b3e41] hover:bg-gray-300 rounded-md cursor-pointer">
-                    <Link href="/pro" className="flex items-center gap-2 text-black dark:text-white w-full">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 256 256">
-                        <path d="M172,36H84A48.05,48.05,0,0,0,36,84v88a48.05,48.05,0,0,0,48,48h88a48.05,48.05,0,0,0,48-48V84A48.05,48.05,0,0,0,172,36ZM84,60h88a24,24,0,0,1,24,24v4H60V84A24,24,0,0,1,84,60ZM172,196H84a24,24,0,0,1-24-24V112H196v60A24,24,0,0,1,172,196Z"></path>
-                      </svg>
-                      Upgrade to Pro
-                    </Link>
-                  </DropdownMenu.Item>
-
-                  {/* Theme Selection Sub-menu */}
-                  <DropdownMenu.Sub>
-                    <DropdownMenu.SubTrigger className="p-2 hover:dark:bg-[#3b3e41] hover:bg-gray-300 rounded-md cursor-pointer flex items-center gap-2 text-black dark:text-white w-full">
-                      {getThemeIcon(actualTheme)}
-                      Theme
-                      <svg className="ml-auto h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </DropdownMenu.SubTrigger>
-                    
-                    <DropdownMenu.Portal>
-                      <DropdownMenu.SubContent
-                        className="w-36 bg-white dark:bg-[#282a2c] border border-gray-200 dark:border-gray-700 rounded-md shadow-lg p-1 z-[1001]"
-                        sideOffset={5}
-                      >
-                        <DropdownMenu.Item
-                          onClick={() => setTheme('light')}
-                          className={`
-                            flex items-center gap-2 p-2 rounded-md cursor-pointer text-sm
-                            hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white
-                            ${theme === 'light' ? 'bg-gray-100 dark:bg-gray-700' : ''}
-                          `}
-                        >
-                          <Sun size={16} className="text-orange-500" />
-                          Light
-                        </DropdownMenu.Item>
-
-                        <DropdownMenu.Item
-                          onClick={() => setTheme('dark')}
-                          className={`
-                            flex items-center gap-2 p-2 rounded-md cursor-pointer text-sm
-                            hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white
-                            ${theme === 'dark' ? 'bg-gray-100 dark:bg-gray-700' : ''}
-                          `}
-                        >
-                          <Moon size={16} className="text-yellow-500" />
-                          Dark
-                        </DropdownMenu.Item>
-
-                        <DropdownMenu.Item
-                          onClick={() => setTheme('system')}
-                          className={`
-                            flex items-center gap-2 p-2 rounded-md cursor-pointer text-sm
-                            hover:bg-gray-100 dark:hover:bg-gray-700 text-black dark:text-white
-                            ${theme === 'system' ? 'bg-gray-100 dark:bg-gray-700' : ''}
-                          `}
-                        >
-                          <Monitor size={16} className="text-gray-500" />
-                          System
-                        </DropdownMenu.Item>
-                      </DropdownMenu.SubContent>
-                    </DropdownMenu.Portal>
-                  </DropdownMenu.Sub>
-
-                  <DropdownMenu.Separator className="h-px bg-gray-200 dark:bg-gray-700 my-1" />
-
-                  <DropdownMenu.Item
-                    onClick={handleSignOut}
-                    className="p-2 hover:dark:bg-[#3b3e41] hover:bg-gray-300 rounded-md text-red-600 dark:text-red-400 cursor-pointer"
-                  >
-                    Logout
-                  </DropdownMenu.Item>
-                </DropdownMenu.Content>
-              </DropdownMenu.Portal>
-            </DropdownMenu.Root>
+            <button
+              onClick={toggleSidebar}
+              className="focus:outline-none rounded-full"
+              aria-label="Open menu"
+            >
+              <UserAvatar user={user} size={34} />
+            </button>
           ) : (
             <Link
               href="/signin"

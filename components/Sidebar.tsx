@@ -1,10 +1,11 @@
 'use client';
 
 import { useSearchHistory } from '@/lib/hooks/useSearchHistory';
-import { NotePencil, X, UserCircle, SignOut, Crown } from '@phosphor-icons/react';
+import { NotePencil, X, UserCircle, SignOut, Crown, Sun, Moon, Monitor } from '@phosphor-icons/react';
 import { IconTrash, IconRefresh } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
+import { useTheme } from '@/lib/theme-context';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -78,6 +79,7 @@ function HistoryList({ onSelectQuery, onClose }: { onSelectQuery: (q: string) =>
 
 export function Sidebar({ isOpen, onClose, onSelectHistoryQuery }: SidebarProps) {
   const { user, logout } = useAuth();
+  const { theme, setTheme } = useTheme();
 
   return (
     <>
@@ -134,6 +136,29 @@ export function Sidebar({ isOpen, onClose, onSelectHistoryQuery }: SidebarProps)
         ) : (
           <div className="flex-1" />
         )}
+
+        {/* Theme toggle */}
+        <div className="flex-shrink-0 px-3 pb-2">
+          <div className="flex items-center gap-1 p-1 rounded-lg bg-gray-100 dark:bg-[#2a2b2c]">
+            {([
+              { value: 'light', icon: <Sun size={14} />, label: 'Light' },
+              { value: 'dark',  icon: <Moon size={14} />, label: 'Dark'  },
+              { value: 'system',icon: <Monitor size={14} />, label: 'Auto'  },
+            ] as const).map(({ value, icon, label }) => (
+              <button
+                key={value}
+                onClick={() => setTheme(value)}
+                className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-md text-xs font-medium transition-colors
+                  ${theme === value
+                    ? 'bg-white dark:bg-[#3b3e41] text-gray-900 dark:text-gray-100 shadow-sm'
+                    : 'text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                  }`}
+              >
+                {icon} {label}
+              </button>
+            ))}
+          </div>
+        </div>
 
         {/* Bottom: user info + logout */}
         {user && (
