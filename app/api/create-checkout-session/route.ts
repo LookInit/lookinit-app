@@ -27,8 +27,10 @@ export async function POST(req: Request) {
       );
     }
 
-    // Use config file for base URL
-    const baseUrl = CONFIG.baseUrl;
+    // Derive base URL from host header — always correct in dev and prod
+    const host = req.headers.get('host') || 'localhost:3000';
+    const protocol = host.startsWith('localhost') || host.startsWith('127.') ? 'http' : 'https';
+    const baseUrl = `${protocol}://${host}`;
 
     // Create a checkout session
     const session = await stripe.checkout.sessions.create({
