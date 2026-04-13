@@ -4,55 +4,38 @@ import { useActions } from 'ai/rsc';
 import Markdown from 'react-markdown';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import { Copy, Check, ArrowsCounterClockwise } from "@phosphor-icons/react";
-import 'react-tooltip/dist/react-tooltip.css'
-import { Tooltip } from 'react-tooltip'
 
-
-
-
-
-const Modal = ({ message, onClose }: { message: string; onClose: () => void }) => {
-    React.useEffect(() => {
-        const timer = setTimeout(onClose, 3000);
-        return () => clearTimeout(timer);
-    }, [onClose]);
-
+const StreamingComponent = ({ currentLlmResponse }: { currentLlmResponse: string }) => {
+    if (!currentLlmResponse) return null;
     return (
-        <div className="fixed top-0 right-0 mt-4 mr-4 z-50 bg-white dark:bg-[#313436] shadow-lg rounded-lg p-4 w-full max-w-sm">
-            <div className="flex items-center">
-                <h2 className="text-lg font-semibold flex-grow text-black dark:text-white">Notice</h2>
-                <div className="flex justify-center ml-2">
-                    <button className="text-black dark:text-white focus:outline-none" onClick={onClose}>
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor" className="h-4 w-4">
-                            <path d="M224 128a8 8 0 0 1-8 8h-80v80a8 8 0 0 1-16 0v-80H40a8 8 0 0 1 0-16h80V40a8 8 0 0 1 16 0v80h80a8 8 0 0 1 8 8Z"></path>
-                        </svg>
-                    </button>
+        <div className="bg-[--card-bg] border border-[--card-border] rounded-xl p-4 mt-4">
+            <div className="flex items-center gap-2 mb-3">
+                <div className="flex gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[--text-muted] animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[--text-muted] animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[--text-muted] animate-bounce" style={{ animationDelay: '300ms' }} />
                 </div>
             </div>
-            <div className="flex flex-wrap mx-1 w-full transition-all duration-500 max-h-[200px] overflow-hidden">
-                <div className="text-black dark:text-white">
-                    {message}
-                </div>
-            </div>
+            <div className="text-[--text-muted] text-sm leading-relaxed">{currentLlmResponse}</div>
         </div>
     );
 };
 
-const StreamingComponent = ({ currentLlmResponse }: { currentLlmResponse: string }) => {
-    return (
-        <>
-            {currentLlmResponse && (
-                <div className="dark:bg-[#282a2c] bg-white shadow-lg rounded-lg p-4 mt-4">
-                    <div className="flex items-center">
-                        <h2 className="text-lg font-semibold flex-grow dark:text-white text-black">Answer</h2>
-                        <img src="./groq.png" alt="groq logo" className='w-6 h-6' />
-                    </div>
-                    <div className="dark:text-gray-300 text-gray-800">{currentLlmResponse}</div>
-                </div>
-            )}
-        </>
-    );
-};
+const SkeletonLoader = () => (
+    <div className="bg-[--card-bg] border border-[--card-border] rounded-xl p-4 mt-4">
+        <div className="flex gap-1 mb-4">
+            <span className="w-1.5 h-1.5 rounded-full bg-[--text-muted] animate-bounce" style={{ animationDelay: '0ms' }} />
+            <span className="w-1.5 h-1.5 rounded-full bg-[--text-muted] animate-bounce" style={{ animationDelay: '150ms' }} />
+            <span className="w-1.5 h-1.5 rounded-full bg-[--text-muted] animate-bounce" style={{ animationDelay: '300ms' }} />
+        </div>
+        <div className="flex flex-col gap-2">
+            <div className="h-2.5 rounded-full bg-[--card-hover] w-full animate-pulse" />
+            <div className="h-2.5 rounded-full bg-[--card-hover] w-4/5 animate-pulse" style={{ animationDelay: '75ms' }} />
+            <div className="h-2.5 rounded-full bg-[--card-hover] w-3/4 animate-pulse" style={{ animationDelay: '150ms' }} />
+            <div className="h-2.5 rounded-full bg-[--card-hover] w-2/3 animate-pulse" style={{ animationDelay: '225ms' }} />
+        </div>
+    </div>
+);
 
 interface LLMResponseComponentProps {
     llmResponse: string;
@@ -63,24 +46,9 @@ interface LLMResponseComponentProps {
     logo?: string;
 }
 
-const SkeletonLoader = () => {
-    return (
-        <div className="dark:bg-[#282a2c] bg-white shadow-lg rounded-lg p-4 mt-4">
-            <div className="flex items-center">
-                <div className="h-4 bg-gray-300 rounded-full dark:bg-[#3b3e41] w-32 mb-4 animate-pulse"></div>
-            </div>
-            <div className="flex flex-col space-y-2">
-                <div className="h-2 bg-gray-300 rounded-full dark:bg-[#3b3e41] w-full animate-pulse delay-75"></div>
-                <div className="h-2 bg-gray-300 rounded-full dark:bg-[#3b3e41] w-3/4 animate-pulse delay-100"></div>
-                <div className="h-2 bg-gray-300 rounded-full dark:bg-[#3b3e41] w-2/3 animate-pulse delay-150"></div>
-            </div>
-        </div>
-    );
-};
-
 const LLMResponseComponent = ({ llmResponse, currentLlmResponse, index, semanticCacheKey, isolatedView, logo }: LLMResponseComponentProps) => {
     const { clearSemanticCache } = useActions<typeof AI>();
-    const [showModal, setShowModal] = useState(false);
+    const [showCacheCleared, setShowCacheCleared] = useState(false);
     const [copied, setCopied] = useState(false);
 
     const hasLlmResponse = llmResponse && llmResponse.trim().length > 0;
@@ -88,52 +56,45 @@ const LLMResponseComponent = ({ llmResponse, currentLlmResponse, index, semantic
 
     const handleClearCache = () => {
         clearSemanticCache(semanticCacheKey);
-        setShowModal(true);
+        setShowCacheCleared(true);
+        setTimeout(() => setShowCacheCleared(false), 2000);
+    };
+
+    const handleCopy = () => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
     };
 
     return (
         <div className={isolatedView ? 'flex flex-col max-w-[1200px] mx-auto' : ''}>
-            {showModal && (
-                <Modal
-                    message={`The query of '${semanticCacheKey}' has been cleared from cache. `}
-                    onClose={() => setShowModal(false)}
-                />
-            )}
-
             {hasLlmResponse || hasCurrentLlmResponse ? (
                 <>
                     {hasLlmResponse ? (
-                        <div className="dark:bg-[#282a2c] bg-white shadow-lg rounded-lg p-4 mt-4">
-                            <div className="flex items-center">
-                                <h2 className="text-lg font-semibold flex-grow dark:text-white text-black">Response</h2>
-                            </div>
-                            <div className="dark:text-gray-300 text-gray-800 markdown-container">
+                        <div className="bg-[--card-bg] border border-[--card-border] rounded-xl p-4 mt-4">
+                            <div className="markdown-container text-[--text-primary]">
                                 <Markdown>{llmResponse}</Markdown>
                             </div>
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center space-between">
-                                    <CopyToClipboard text={llmResponse} onCopy={() => setCopied(true)}>
-                                        <button id="not-clickable" className="text-black dark:text-white focus:outline-none mr-2">
-                                            {copied ? <Check size={20} /> : <Copy size={20} />}
-                                            <Tooltip anchorSelect="#not-clickable">
-                                                <button>Copy</button>
-                                            </Tooltip>
+                            <div className="flex items-center justify-between mt-3 pt-3 border-t border-[--divider]">
+                                <div className="flex items-center gap-1">
+                                    <CopyToClipboard text={llmResponse} onCopy={handleCopy}>
+                                        <button className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[--text-muted] hover:text-[--text-primary] hover:bg-[--card-hover] transition-colors text-xs">
+                                            {copied ? <Check size={14} /> : <Copy size={14} />}
+                                            {copied ? 'Copied' : 'Copy'}
                                         </button>
                                     </CopyToClipboard>
                                     {!isolatedView && (
-                                        <button id="#not-clickable2" className="text-black dark:text-white focus:outline-none" onClick={handleClearCache}>
-                                            <ArrowsCounterClockwise size={20} />
+                                        <button
+                                            onClick={handleClearCache}
+                                            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[--text-muted] hover:text-[--text-primary] hover:bg-[--card-hover] transition-colors text-xs"
+                                            title="Clear cache for this query"
+                                        >
+                                            <ArrowsCounterClockwise size={14} className={showCacheCleared ? 'animate-spin' : ''} />
+                                            {showCacheCleared ? 'Cleared' : 'Refresh'}
                                         </button>
                                     )}
-
                                 </div>
-                                {!isolatedView && (
-                                    <div className="flex items-center justify-end">
-                                        <img src="./powered-by-groq.svg" alt="powered by groq" className='mt-2 h-6' />
-                                    </div>
-                                )}
                                 {logo && (
-                                    <img src={logo} alt="logo" className='mt-2 h-6 ml-auto' />
+                                    <img src={logo} alt="model logo" className="h-5 opacity-60" />
                                 )}
                             </div>
                         </div>

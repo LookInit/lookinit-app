@@ -84,8 +84,8 @@ export function ChatInput({
 
   return (
     <form ref={formRef} onSubmit={handleFormSubmit} className="w-full pointer-events-auto relative">
-      <div className={`relative flex flex-col w-full bg-white dark:bg-[#282a2c] border rounded-lg shadow-lg p-4 pointer-events-auto ${isExpanded ? 'h-40' : 'h-24'}`}>
-        
+      <div className={`relative flex flex-col w-full bg-[--card-bg] border border-[--card-border] rounded-2xl shadow-[0_4px_32px_rgba(0,0,0,0.18)] p-3 pointer-events-auto transition-all ${isExpanded ? 'h-44' : 'h-24'}`}>
+
         {/* Models Dropdown */}
         <div className="absolute left-3 top-3 z-50">
           <ModelsDropdown
@@ -101,14 +101,14 @@ export function ChatInput({
           ref={inputRef}
           tabIndex={0}
           onKeyDown={onKeyDown}
-          placeholder="Ask Lookinit or select a model to get started"
-          className={`w-full resize-none bg-transparent px-4 py-3 focus:outline-none sm:text-sm dark:text-white text-black ${isExpanded ? 'text-lg pt-12' : 'text-sm pt-10'} ${selectedMentionToolLogo ? 'pl-16' : ''}`}
+          placeholder="Ask anything..."
+          className={`w-full resize-none bg-transparent focus:outline-none text-[--text-primary] placeholder:text-[--text-muted] text-sm leading-relaxed ${isExpanded ? 'pt-10 px-3' : 'pt-9 px-3'} ${selectedMentionToolLogo ? 'pl-16' : ''}`}
           autoFocus
           spellCheck={false}
           autoComplete="off"
           autoCorrect="off"
           name="message"
-          rows={isExpanded ? 5 : 1}
+          rows={isExpanded ? 5 : 2}
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
         />
@@ -118,33 +118,36 @@ export function ChatInput({
           <>
             <label
               htmlFor="fileInput"
-              className="absolute left-12 top-12 w-6 h-6 -rotate-45 transition-transform duration-300 hover:rotate-0 cursor-pointer"
+              className="absolute left-12 top-11 text-[--text-muted] hover:text-[--text-primary] -rotate-45 hover:rotate-0 transition-transform duration-200 cursor-pointer"
             >
-              <Paperclip size={24} />
+              <Paperclip size={18} />
             </label>
             <input
               id="fileInput"
               type="file"
-              accept=".doc,.docx,.pdf, .txt, .js, .tsx"
+              accept=".doc,.docx,.pdf,.txt,.js,.tsx"
               style={{ display: 'none' }}
               onChange={(e) => {
                 const file = e.target.files?.[0];
-                if (file) {
-                  handleFileUpload(file);
-                }
+                if (file) handleFileUpload(file);
               }}
             />
           </>
         )}
 
         <ChatScrollAnchor trackVisibility={false} />
-        
+
         {/* Submit Button */}
-        <div className="absolute right-5 bottom-5">
+        <div className="absolute right-3 bottom-3">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button type="submit" size="icon" disabled={inputValue === ''}>
-                <ArrowUp />
+              <Button
+                type="submit"
+                size="icon"
+                disabled={inputValue === ''}
+                className="w-8 h-8 rounded-xl bg-[--text-primary] hover:opacity-80 disabled:opacity-20 transition-opacity"
+              >
+                <ArrowUp size={16} className="text-[--surface]" />
                 <span className="sr-only">Send message</span>
               </Button>
             </TooltipTrigger>

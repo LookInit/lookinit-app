@@ -1,8 +1,6 @@
-// 1. Import the 'useState' hook from React
 import { useState } from 'react';
-import { IconPlus, IconClose } from '@/components/ui/icons';
+import { X, ArrowSquareOut } from '@phosphor-icons/react';
 
-// 2. Define the 'ShoppingItem' interface based on the structure of the shopping data
 interface ShoppingItem {
     title: string;
     source: string;
@@ -17,96 +15,117 @@ interface ShoppingItem {
     position: number;
 }
 
-// 3. Define the 'ShoppingComponentProps' interface with a 'shopping' property of type 'ShoppingItem[]'
 interface ShoppingComponentProps {
     shopping: ShoppingItem[];
 }
 
-// 4. Define the 'ShoppingComponent' functional component that takes 'shopping' as a prop
 const ShoppingComponent: React.FC<ShoppingComponentProps> = ({ shopping }) => {
-    console.log('shopping', shopping);
-    // 5. Use the 'useState' hook to manage the 'showModal' state
     const [showModal, setShowModal] = useState(false);
 
-    // 6. Define the 'ShoppingSkeleton' component to render a loading skeleton
     const ShoppingSkeleton = () => (
-        <>
-            {Array.from({ length: 5 }).map((_, index) => (
-                <div key={index} className="flex items-center space-x-4">
-                    <div className="w-10 h-10 bg-gray-300 dark:bg-[#3b3e41] rounded-full animate-pulse"></div>
-                    <div className="flex-grow">
-                        <div className="w-2/3 h-4 bg-gray-300 dark:bg-[#3b3e41] rounded animate-pulse mb-2"></div>
-                        <div className="w-1/2 h-4 bg-gray-300 dark:bg-[#3b3e41] rounded animate-pulse"></div>
+        <div className="flex flex-col gap-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-3 animate-pulse">
+                    <div className="w-10 h-10 rounded-lg bg-[--card-hover] flex-shrink-0" />
+                    <div className="flex-1 flex flex-col gap-1.5">
+                        <div className="h-3 rounded bg-[--card-hover] w-3/4" />
+                        <div className="h-3 rounded bg-[--card-hover] w-1/2" />
                     </div>
                 </div>
             ))}
-        </>
+        </div>
     );
 
-    // 7. Render the 'ShoppingComponent'
     return (
-        <div className="bg-white dark:bg-[#282a2c] shadow-lg rounded-lg p-4 mt-4">
-            <div className="flex items-center">
-                <h2 className="text-lg font-semibold flex-grow text-gray-900 dark:text-gray-100">Shopping Results</h2>
-                <IconPlus className="w-4 h-4 cursor-pointer text-gray-500 dark:text-gray-400" onClick={() => setShowModal(true)} />
-            </div>
-            <div className="mt-4">
+        <>
+            <div className="bg-[--card-bg] border border-[--card-border] rounded-xl p-4 mt-4">
+                <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-xs font-semibold uppercase tracking-widest text-[--text-muted]">Shopping</h2>
+                    {shopping.length > 0 && (
+                        <button
+                            onClick={() => setShowModal(true)}
+                            className="text-xs text-[--text-muted] hover:text-[--text-primary] transition-colors"
+                        >
+                            View all
+                        </button>
+                    )}
+                </div>
                 {shopping.length === 0 ? (
                     <ShoppingSkeleton />
                 ) : (
-                    shopping.slice(0, 3).map((item, index) => (
-                        <div key={index} className="flex items-center space-x-4 mb-4">
-                            <div className="w-10 h-10 overflow-hidden flex-shrink-0">
-                                <a href={item.link} target="_blank" rel="noopener noreferrer">
-                                    <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover rounded-full" />
-                                </a>
-                            </div>
-                            <div className="flex-grow">
-                                <a href={item.link} target="_blank" rel="noopener noreferrer" className="font-semibold text-sm mb-1 hover:underline text-gray-900 dark:text-gray-100">{item.title}</a>
-                                <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
-                                    <span className="mr-1">{item.source}</span>
-                                    <span className="text-yellow-500 mr-1">{'★'.repeat(Math.floor(item.rating))}</span>
-                                    <span>({item.ratingCount})</span>
+                    <div className="flex flex-col gap-3">
+                        {shopping.slice(0, 3).map((item, i) => (
+                            <a
+                                key={i}
+                                href={item.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-3 group"
+                            >
+                                <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-[--card-hover]">
+                                    <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
                                 </div>
-                                <p className="text-gray-900 dark:text-gray-100 font-semibold text-sm">{item.price}</p>
-                            </div>
-                        </div>
-                    ))
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-xs font-medium text-[--text-primary] group-hover:underline truncate">{item.title}</p>
+                                    <div className="flex items-center gap-1.5 mt-0.5">
+                                        <span className="text-xs text-[--text-muted]">{item.source}</span>
+                                        {item.rating > 0 && (
+                                            <span className="text-xs text-yellow-500">{'★'.repeat(Math.min(Math.floor(item.rating), 5))}</span>
+                                        )}
+                                    </div>
+                                    <p className="text-xs font-semibold text-[--text-primary] mt-0.5">{item.price}</p>
+                                </div>
+                            </a>
+                        ))}
+                    </div>
                 )}
             </div>
+
             {showModal && (
-                <div className="fixed inset-0 flex items-center justify-center z-50">
-                    <div className="fixed inset-0 bg-black opacity-10 transition-opacity" onClick={() => setShowModal(false)}></div>
-                    <div className="bg-white dark:bg-[#282a2c] rounded-lg shadow-xl max-w-3xl w-full mx-auto overflow-hidden relative">
-                        <div className="sticky top-0 bg-white dark:bg-[#282a2c] px-6 py-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-700">
-                            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Shopping Results</h2>
-                            <IconClose className="w-6 h-6 cursor-pointer text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition duration-150 ease-in-out" onClick={() => setShowModal(false)} />
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowModal(false)} />
+                    <div className="relative bg-[--card-bg] border border-[--card-border] rounded-2xl w-full max-w-xl max-h-[80vh] flex flex-col overflow-hidden">
+                        <div className="flex items-center justify-between px-5 py-4 border-b border-[--divider]">
+                            <h2 className="text-sm font-semibold text-[--text-primary]">Shopping Results</h2>
+                            <button
+                                onClick={() => setShowModal(false)}
+                                className="p-1.5 rounded-lg text-[--text-muted] hover:text-[--text-primary] hover:bg-[--card-hover] transition-colors"
+                            >
+                                <X size={16} />
+                            </button>
                         </div>
-                        <div className="overflow-y-auto p-6 space-y-6 max-h-[70vh]">
-                            {shopping.map((item, index) => (
-                                <div key={index} className="flex items-center space-x-6">
-                                    <div className="w-24 h-24 overflow-hidden flex-shrink-0 rounded">
-                                        <a href={item.link} target="_blank" rel="noopener noreferrer">
-                                            <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
-                                        </a>
+                        <div className="overflow-y-auto p-5 flex flex-col gap-4 scrollbar-thin">
+                            {shopping.map((item, i) => (
+                                <a
+                                    key={i}
+                                    href={item.link}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-4 group"
+                                >
+                                    <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-[--card-hover]">
+                                        <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
                                     </div>
-                                    <div className="flex-grow">
-                                        <a href={item.link} target="_blank" rel="noopener noreferrer" className="font-bold text-xl mb-2 hover:underline text-gray-900 dark:text-gray-100">{item.title}</a>
-                                        <p className="text-gray-500 dark:text-gray-400 text-base mb-2">{item.source}</p>
-                                        <div className="flex items-center mb-2">
-                                            <span className="text-yellow-500 text-lg mr-1">{'★'.repeat(Math.floor(item.rating))}</span>
-                                            <span className="text-gray-500 dark:text-gray-400 text-sm">{item.ratingCount}</span>
-                                        </div>
-                                        <p className="text-gray-900 dark:text-gray-100 font-bold text-lg mb-2">{item.price}</p>
-                                        {item.delivery && <p className="text-gray-500 dark:text-gray-400 text-base">{item.delivery}</p>}
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium text-[--text-primary] group-hover:underline line-clamp-2">{item.title}</p>
+                                        <p className="text-xs text-[--text-muted] mt-0.5">{item.source}</p>
+                                        {item.rating > 0 && (
+                                            <div className="flex items-center gap-1 mt-0.5">
+                                                <span className="text-xs text-yellow-500">{'★'.repeat(Math.min(Math.floor(item.rating), 5))}</span>
+                                                <span className="text-xs text-[--text-muted]">({item.ratingCount})</span>
+                                            </div>
+                                        )}
+                                        <p className="text-sm font-semibold text-[--text-primary] mt-1">{item.price}</p>
+                                        {item.delivery && <p className="text-xs text-[--text-muted] mt-0.5">{item.delivery}</p>}
                                     </div>
-                                </div>
+                                    <ArrowSquareOut size={16} className="flex-shrink-0 text-[--text-muted] group-hover:text-[--text-primary] transition-colors" />
+                                </a>
                             ))}
                         </div>
                     </div>
                 </div>
             )}
-        </div>
+        </>
     );
 };
 

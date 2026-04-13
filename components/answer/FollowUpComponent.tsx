@@ -1,4 +1,4 @@
-import { IconPlus } from '@/components/ui/icons';
+import { ArrowRight } from '@phosphor-icons/react';
 
 interface FollowUp {
     choices: {
@@ -25,22 +25,20 @@ const FollowUpComponent = ({ followUp, handleFollowUpClick }: { followUp: Follow
     if (questions.length === 0) return null;
 
     return (
-        <div className="dark:bg-[#282a2c] bg-white shadow-lg rounded-lg p-4 mt-4">
-            <h2 className="text-lg font-semibold dark:text-white text-black mb-2">Follow-Up</h2>
-            <ul className="mt-2">
+        <div className="bg-[--card-bg] border border-[--card-border] rounded-xl p-4 mt-4">
+            <h2 className="text-xs font-semibold uppercase tracking-widest text-[--text-muted] mb-3">Follow-up</h2>
+            <div className="flex flex-col gap-1.5">
                 {questions.map((question: string, index: number) => (
-                    <li
+                    <button
                         key={index}
-                        className="flex items-center mt-2 cursor-pointer"
                         onClick={() => handleFollowUpClick(question)}
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-sm text-[--text-muted] hover:text-[--text-primary] hover:bg-[--card-hover] transition-all group"
                     >
-                        <span className="mr-2 dark:text-white text-black">
-                            <IconPlus />
-                        </span>
-                        <p className="dark:text-white text-black hover:underline">{question}</p>
-                    </li>
+                        <ArrowRight size={14} className="flex-shrink-0 opacity-40 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
+                        <span>{question}</span>
+                    </button>
                 ))}
-            </ul>
+            </div>
         </div>
     );
 };

@@ -81,7 +81,7 @@ export function ModelsDropdown({
           e.stopPropagation();
           setShowDropdown(!showDropdown);
         }}
-        className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md transition-colors pointer-events-auto"
+        className="flex items-center gap-2 px-2.5 py-1.5 text-xs font-medium text-[--text-muted] hover:text-[--text-primary] bg-[--card-hover] hover:bg-[--divider] rounded-lg transition-colors pointer-events-auto"
       >
         {selectedMentionToolLogo ? (
           <img src={selectedMentionToolLogo} className="w-4 h-4 rounded-full" alt="Selected model" />
@@ -98,21 +98,21 @@ export function ModelsDropdown({
 
       {showDropdown && (
         <div 
-          className={`absolute left-0 w-80 bg-white dark:bg-[#282a2c] border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl max-h-60 overflow-y-auto z-[100] pointer-events-auto ${
-            dropdownDirection === 'up' 
-              ? 'bottom-full mb-1' 
+          className={`absolute left-0 w-72 bg-[--card-bg] border border-[--card-border] rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.24)] max-h-64 overflow-y-auto z-[100] pointer-events-auto scrollbar-thin ${
+            dropdownDirection === 'up'
+              ? 'bottom-full mb-1'
               : 'top-full mt-1'
           }`}
         >
-          <div className="p-2 border-b border-gray-200 dark:border-gray-700">
-            <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-              Select AI Model
+          <div className="px-3 py-2.5 border-b border-[--divider]">
+            <p className="text-[10px] font-semibold text-[--text-muted] uppercase tracking-widest">
+              Select Model
             </p>
           </div>
           {mentionTools.map((tool) => (
             <div
               key={tool.id}
-              className="flex items-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 p-3 border-b border-gray-100 dark:border-gray-600 last:border-b-0 transition-colors pointer-events-auto"
+              className="flex items-center cursor-pointer hover:bg-[--card-hover] px-3 py-2.5 border-b border-[--divider] last:border-b-0 transition-colors pointer-events-auto"
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -123,21 +123,21 @@ export function ModelsDropdown({
                 <img
                   src={tool.logo}
                   alt={tool.name}
-                  className="w-8 h-8 rounded-full flex-shrink-0"
+                  className="w-7 h-7 rounded-lg flex-shrink-0"
                 />
               ) : (
-                <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-600 flex items-center justify-center flex-shrink-0">
-                  <svg className="h-4 w-4 text-gray-600 dark:text-gray-300" fill="currentColor" viewBox="0 0 256 256">
+                <div className="w-7 h-7 rounded-lg bg-[--card-hover] flex items-center justify-center flex-shrink-0">
+                  <svg className="h-3.5 w-3.5 text-[--text-muted]" fill="currentColor" viewBox="0 0 256 256">
                     <path d="M224 128a8 8 0 0 1-8 8h-80v80a8 8 0 0 1-16 0v-80H40a8 8 0 0 1 0-16h80V40a8 8 0 0 1 16 0v80h80a8 8 0 0 1 8 8Z"></path>
                   </svg>
                 </div>
               )}
               <div className="ml-3 flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                <p className="text-sm font-medium text-[--text-primary] truncate">
                   {tool.name}
                 </p>
                 {tool.enableRAG && (
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="text-[11px] text-[--text-muted]">
                     Supports file upload
                   </p>
                 )}

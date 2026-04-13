@@ -37,9 +37,9 @@ const Map = ({ places }: { places: Place[] }) => {
         : [0, 0];
 
     return (
-        <div className={`bg-white dark:bg-[#282a2c] shadow-lg rounded-lg p-4 mt-4 `}>
-            <div className="flex items-center">
-                <h2 className="text-lg font-semibold flex-grow text-black dark:text-white">Locations</h2>
+        <div className="bg-[--card-bg] border border-[--card-border] rounded-xl p-4 mt-4">
+            <div className="flex items-center mb-3">
+                <h2 className="text-xs font-semibold uppercase tracking-widest text-[--text-muted]">Map</h2>
             </div>
             <div className={`mt-4`}>
                 <MapContainer

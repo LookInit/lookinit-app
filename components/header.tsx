@@ -69,36 +69,39 @@ export function Header() {
       />
 
       {/* Header */}
-      <header className={`sticky top-0 z-[500] flex items-center justify-between w-full px-4 h-14 shrink-0 bg-[#f9f9f9] dark:bg-[#1B1C1D] backdrop-blur-xl ${isVisible ? 'header-visible' : 'header-hidden'}`}>
-        {/* Sidebar Toggle Button */}
-        <button onClick={toggleSidebar} className="p-2 hover:bg-gray-300 hover:dark:bg-[#282a2c] text-black rounded-md">
-          <SidebarIcon size={24} className="text-black dark:text-white" />
+      <header className={`sticky top-0 z-[500] flex items-center justify-between w-full px-4 h-12 shrink-0 backdrop-blur-md bg-[--surface]/80 border-b border-[--card-border] ${isVisible ? 'header-visible' : 'header-hidden'}`}>
+        {/* Sidebar Toggle */}
+        <button
+          onClick={toggleSidebar}
+          className="p-1.5 rounded-md text-[--text-muted] hover:text-[--text-primary] hover:bg-[--card-hover] transition-colors"
+        >
+          <SidebarIcon size={20} />
         </button>
 
-        {/* Logo Section */}
-        <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center">
-          <a href="https://lookinit.com/" rel="noopener" target="_blank" className="flex items-center">
-            <img src="/bg.png" alt="Lookinit Logo" className="h-16 w-auto sm:h-20 lg:h-24 dark:hidden" />
-            <img src="/bgw.png" alt="Lookinit Logo White" className="hidden dark:block h-16 w-auto sm:h-20 lg:h-24" />
+        {/* Logo — centered */}
+        <div className="absolute left-1/2 -translate-x-1/2">
+          <a href="https://lookinit.com/" rel="noopener" target="_blank">
+            <img src="/bg.png"  alt="Lookinit" className="h-12 w-auto dark:hidden" />
+            <img src="/bgw.png" alt="Lookinit" className="hidden dark:block h-12 w-auto" />
           </a>
         </div>
 
-        {/* Login/Signup / Profile Dropdown */}
-        <div className="ml-auto flex items-center gap-2">
+        {/* Right side */}
+        <div className="flex items-center gap-2">
           {loading ? (
-            <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse" />
+            <div className="w-7 h-7 rounded-full bg-[--card-hover] animate-pulse" />
           ) : user ? (
             <button
               onClick={toggleSidebar}
-              className="focus:outline-none rounded-full"
+              className="focus:outline-none rounded-full ring-2 ring-transparent hover:ring-[--card-border] transition-all"
               aria-label="Open menu"
             >
-              <UserAvatar user={user} size={34} />
+              <UserAvatar user={user} size={30} />
             </button>
           ) : (
             <Link
               href="/signin"
-              className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-black dark:text-white hover:bg-gray-200 dark:hover:bg-[#282a2c] rounded-md transition-colors"
+              className="px-3 py-1.5 text-sm font-medium rounded-md border border-[--card-border] text-[--text-primary] hover:bg-[--card-hover] transition-colors"
             >
               Sign in
             </Link>

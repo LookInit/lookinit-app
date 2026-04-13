@@ -9,10 +9,9 @@ export default function Image({ src, query }: ImageProps) {
     // 3. Render the 'Image' component
     return (
         <div className="flex flex-col max-w-[1200px] mx-auto">
-            <div className="flex items-center max-w-[1200px] max-h-full shadow-lg p-4 mt-4 rounded-lg relative">
+            <div className="bg-[--card-bg] border border-[--card-border] rounded-xl p-4 mt-4 flex items-center relative">
                 {!src ? (
-                    // 4. Render the skeleton loader only for the image
-                    <div className="w-[600px] h-[600px] bg-gray-300 rounded-lg animate-pulse mr-6"></div>
+                    <div className="w-[600px] h-[600px] bg-[--card-hover] rounded-lg animate-pulse mr-6"></div>
                 ) : (
                     <img
                         src={src}
@@ -22,17 +21,13 @@ export default function Image({ src, query }: ImageProps) {
                 )}
                 <div className="flex-1 flex flex-col justify-center items-center">
                     {query && (
-                        <div className="dark:text-white text-xl font-bold mb-4">
+                        <div className="text-[--text-primary] text-xl font-bold mb-4">
                             {query}
                         </div>
                     )}
                 </div>
                 <div className="absolute bottom-4 right-4">
-                    <img
-                        src="./fal.svg"
-                        alt="powered by fal.ai"
-                        className="h-6"
-                    />
+                    <img src="./fal.svg" alt="powered by fal.ai" className="h-6 opacity-60" />
                 </div>
             </div>
         </div>

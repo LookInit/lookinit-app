@@ -2,9 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Header } from '@/components/header';
-import { Button } from '@/components/ui/button';
-import { CheckCircle } from '@phosphor-icons/react';
+import { CheckCircle, ArrowRight, Spinner } from '@phosphor-icons/react';
 import { useToast } from '@/components/ui/use-toast';
 
 export default function SuccessPage() {
@@ -16,99 +14,75 @@ export default function SuccessPage() {
 
   useEffect(() => {
     async function verifySession() {
-      if (!sessionId) return;
-
+      if (!sessionId) { setVerifying(false); return; }
       try {
-        const response = await fetch('/api/stripe/verify-session', {
+        const res = await fetch('/api/stripe/verify-session', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ sessionId }),
         });
-
-        const data = await response.json();
-        
-        if (response.ok && data.success) {
+        const data = await res.json();
+        if (res.ok && data.success) {
           setVerified(true);
-          toast({
-            title: 'Subscription Activated',
-            description: 'Your subscription has been successfully activated.',
-          });
         } else {
-          toast({
-            title: 'Verification Failed',
-            description: data.error || 'Failed to verify your subscription.',
-            variant: 'destructive',
-          });
+          toast({ title: 'Verification failed', description: data.error || 'Could not verify subscription.', variant: 'destructive' });
         }
-      } catch (error) {
-        console.error('Error verifying session:', error);
-        toast({
-          title: 'Verification Error',
-          description: 'An error occurred while verifying your subscription.',
-          variant: 'destructive',
-        });
+      } catch {
+        toast({ title: 'Error', description: 'Could not verify subscription.', variant: 'destructive' });
       } finally {
         setVerifying(false);
       }
     }
-
     verifySession();
   }, [sessionId, toast]);
 
   return (
-    <div>
-      <Header />
-      <div className="container mx-auto py-16 px-4">
-        <div className="max-w-md mx-auto bg-white dark:bg-[#282a2c] rounded-lg shadow-lg p-8 text-center">
-          {verifying ? (
-            <div>
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <h1 className="text-2xl font-bold mb-2">Verifying your subscription...</h1>
-              <p className="text-gray-600 dark:text-gray-400">Please wait while we confirm your payment.</p>
+    <div className="flex items-center justify-center min-h-[calc(100vh-48px)] px-4">
+      <div className="w-full max-w-sm bg-[--card-bg] border border-[--card-border] rounded-2xl p-8 text-center shadow-[0_8px_40px_rgba(0,0,0,0.18)]">
+        {verifying ? (
+          <>
+            <Spinner size={36} className="text-[--text-muted] animate-spin mx-auto mb-4" />
+            <h1 className="text-lg font-semibold text-[--text-primary] mb-1">Verifying payment…</h1>
+            <p className="text-sm text-[--text-muted]">Hang tight, confirming your subscription.</p>
+          </>
+        ) : verified ? (
+          <>
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-5">
+              <CheckCircle size={28} weight="fill" className="text-emerald-400" />
             </div>
-          ) : verified ? (
-            <div>
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full mb-4">
-                <CheckCircle size={32} className="text-green-600 dark:text-green-400" />
-              </div>
-              <h1 className="text-2xl font-bold mb-2">Thank You!</h1>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Your subscription has been successfully activated. You now have unlimited searches!
-              </p>
-              <div className="space-y-4">
-                <Button 
-                  className="w-full" 
-                  onClick={() => window.location.href = '/'}
-                >
-                  Start Searching
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={() => window.location.href = '/account'}
-                >
-                  View Account
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div>
-              <h1 className="text-2xl font-bold mb-2">Verification Failed</h1>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
-                We couldn't verify your subscription. Please contact support if you believe this is an error.
-              </p>
-              <Button 
-                variant="outline" 
-                className="w-full"
+            <h1 className="text-xl font-semibold text-[--text-primary] mb-2">You're all set!</h1>
+            <p className="text-sm text-[--text-muted] mb-7">
+              Your subscription is active. Enjoy unlimited searches.
+            </p>
+            <div className="flex flex-col gap-2">
+              <button
                 onClick={() => window.location.href = '/'}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[--text-primary] text-[--surface] text-sm font-medium hover:opacity-85 transition-opacity"
               >
-                Return to Home
-              </Button>
+                Start searching <ArrowRight size={15} />
+              </button>
+              <button
+                onClick={() => window.location.href = '/account'}
+                className="w-full px-4 py-2.5 rounded-xl border border-[--card-border] text-sm text-[--text-muted] hover:text-[--text-primary] hover:bg-[--card-hover] transition-colors"
+              >
+                View account
+              </button>
             </div>
-          )}
-        </div>
+          </>
+        ) : (
+          <>
+            <h1 className="text-xl font-semibold text-[--text-primary] mb-2">Verification failed</h1>
+            <p className="text-sm text-[--text-muted] mb-7">
+              We couldn't confirm your subscription. Contact support if you were charged.
+            </p>
+            <button
+              onClick={() => window.location.href = '/'}
+              className="w-full px-4 py-2.5 rounded-xl border border-[--card-border] text-sm text-[--text-muted] hover:text-[--text-primary] hover:bg-[--card-hover] transition-colors"
+            >
+              Return home
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

@@ -12,7 +12,11 @@ if (config.useSemanticCache) {
 
 export async function setInSemanticCache(userMessage: string, data: any) {
     if (config.useSemanticCache && semanticCache && data.llmResponse.length > 0) {
-        await semanticCache.set(userMessage, JSON.stringify(data));
+        try {
+            await semanticCache.set(userMessage, JSON.stringify(data));
+        } catch {
+            // Non-critical — cache write failure doesn't affect the user
+        }
     }
 }
 
@@ -31,7 +35,12 @@ export async function initializeSemanticCache() {
 }
 export async function getFromSemanticCache(userMessage: string) {
     if (semanticCache) {
-        return semanticCache.get(userMessage);
+        try {
+            return await semanticCache.get(userMessage);
+        } catch {
+            // Cache miss — continue with a fresh search
+            return null;
+        }
     }
     return null;
 }

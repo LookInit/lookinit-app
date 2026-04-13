@@ -13,7 +13,6 @@ import FinancialChart from '@/components/answer/FinancialChart';
 import Spotify from '@/components/answer/Spotify';
 import ImageGenerationComponent from '@/components/answer/ImageGenerationComponent';
 import PaymentPrompt from '@/components/answer/PaymentPrompt';
-import RateLimit from '@/components/answer/RateLimit';
 import dynamic from 'next/dynamic';
 
 const MapComponent = dynamic(() => import('@/components/answer/Map'), { ssr: false });
@@ -39,8 +38,10 @@ export function ChatContainer({
     <div className="flex flex-col pb-32 md:pb-40">
       {messages.map((message, index) => (
         <div key={`message-${index}`}>
-          {message.status === 'searchLimitReached' ? (
-            <PaymentPrompt />
+          {message.status === 'searchLimitReached' || message.status === 'rateLimitReached' ? (
+            <div className="pb-40 md:pb-48 px-4 max-w-[1200px] mx-auto w-full">
+              <PaymentPrompt />
+            </div>
           ) : message.isolatedView ? (
             selectedMentionTool === 'fal-ai/stable-diffusion-v3-medium' || message.falBase64Image ? (
               <ImageGenerationComponent 
@@ -62,8 +63,7 @@ export function ChatContainer({
           ) : (
             <div className="flex flex-col md:flex-row max-w-[1200px] mx-auto">
               <div className="w-full md:w-3/4 md:pr-2">
-                {message.status && message.status === 'rateLimitReached' && <RateLimit />}
-                {message.type === 'userMessage' && <UserMessageComponent message={message.userMessage} />}
+{message.type === 'userMessage' && <UserMessageComponent message={message.userMessage} />}
                 {message.ticker && message.ticker.length > 0 && (
                   <FinancialChart key={`financialChart-${index}`} ticker={message.ticker} />
                 )}

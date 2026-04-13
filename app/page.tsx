@@ -89,6 +89,12 @@ export default function HomePage() {
 
   return (
     <div>
+      {messages.length === 0 && (
+        <div className="flex flex-col items-center justify-center min-h-[calc(100vh-48px-80px)] px-4 select-none">
+          <p className="text-[--text-muted] text-base font-medium tracking-tight">What do you want to know?</p>
+        </div>
+      )}
+
       <ChatContainer
         messages={messages}
         currentLlmResponse={currentLlmResponse}
@@ -96,8 +102,8 @@ export default function HomePage() {
         handleFollowUpClick={handleFollowUpClick}
       />
 
-      <div className={`px-2 fixed inset-x-0 bottom-0 w-full bg-gradient-to-b duration-300 ease-in-out animate-in dark:from-gray-900/10 dark:from-10% peer-[[data-state=open]]:group-[]:lg:pl-[250px] peer-[[data-state=open]]:group-[]:xl:pl-[300px]] mb-4 bring-to-front z-40 ${messages.length === 0 ? 'pointer-events-none' : ''}`}>
-        <div className="mx-auto max-w-3xl sm:px-4">
+      <div className="px-4 fixed inset-x-0 bottom-0 w-full z-[200] pb-4 pt-6 bg-gradient-to-t from-[--surface] via-[--surface]/90 to-transparent">
+        <div className="mx-auto max-w-3xl">
           <ChatInput
             inputValue={inputValue}
             setInputValue={handleInputChange}

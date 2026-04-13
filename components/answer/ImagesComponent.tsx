@@ -50,7 +50,7 @@ const ImagesComponent: React.FC<ImagesComponentProps> = ({ images }) => {
     const ImagesSkeleton = () => (
         <div className="w-full p-1 ">
             <div className="w-full overflow-hidden aspect-video mt-5">
-                <div className="w-full h-full bg-gray-300 dark:bg-[#3b3e41] rounded animate-pulse"></div>
+                <div className="w-full h-full bg-[--card-hover] rounded animate-pulse"></div>
             </div>
         </div>
     );
@@ -58,7 +58,7 @@ const ImagesComponent: React.FC<ImagesComponentProps> = ({ images }) => {
     const currentImage = images[photoIndex];
 
     return (
-        <div className="bg-white dark:bg-[#282a2c] shadow-lg rounded-lg mt-4 w-full px-2 flex items-center justify-center">
+        <div className="bg-[--card-bg] border border-[--card-border] rounded-xl mt-4 w-full px-2 flex items-center justify-center">
             <Carousel
                 plugins={[
                     Autoplay({
