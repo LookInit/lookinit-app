@@ -33,43 +33,43 @@ function HistoryList({ onSelectQuery, onClose }: { onSelectQuery: (q: string) =>
     <div className="flex flex-col min-h-0 flex-1">
       {/* History header with actions */}
       <div className="flex items-center justify-between px-2 mb-1 flex-shrink-0">
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+        <span className="text-[10px] font-semibold uppercase tracking-widest text-[--text-muted]">
           Recent
         </span>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5">
           <button
             onClick={refreshHistory}
-            className="p-1 rounded text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-[#3b3e41]"
+            className="p-1 rounded-md text-[--text-muted] hover:text-[--text-primary] hover:bg-[--card-hover] transition-colors"
             title="Refresh"
           >
-            <IconRefresh size={13} />
+            <IconRefresh size={12} />
           </button>
           <button
             onClick={() => window.confirm('Clear all history?') && clearAllHistory()}
-            className="p-1 rounded text-gray-400 hover:text-red-500 hover:bg-gray-100 dark:hover:bg-[#3b3e41]"
+            className="p-1 rounded-md text-[--text-muted] hover:text-red-400 hover:bg-[--card-hover] transition-colors"
             title="Clear all"
           >
-            <IconTrash size={13} />
+            <IconTrash size={12} />
           </button>
         </div>
       </div>
 
       {/* Scrollable history items */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden pr-1 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden pr-1 scrollbar-thin">
         {history.map((item) => (
           <div
             key={item.id}
-            className="group flex items-start justify-between gap-1 px-2 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-[#3b3e41] cursor-pointer"
+            className="group flex items-start justify-between gap-1 px-2.5 py-1.5 rounded-lg hover:bg-[--card-hover] cursor-pointer transition-colors"
             onClick={() => { onSelectQuery(item.query); onClose(); }}
           >
-            <p className="text-sm text-gray-700 dark:text-gray-300 truncate leading-snug flex-1">
+            <p className="text-sm text-[--text-muted] group-hover:text-[--text-primary] truncate leading-snug flex-1 transition-colors">
               {item.query}
             </p>
             <button
               onClick={(e) => { e.stopPropagation(); deleteHistoryItem(item.id); }}
-              className="opacity-0 group-hover:opacity-100 p-0.5 text-gray-400 hover:text-red-500 flex-shrink-0 mt-0.5"
+              className="opacity-0 group-hover:opacity-100 p-0.5 text-[--text-muted] hover:text-red-400 flex-shrink-0 mt-0.5 transition-colors"
             >
-              <IconTrash size={13} />
+              <IconTrash size={12} />
             </button>
           </div>
         ))}
@@ -85,37 +85,37 @@ export function Sidebar({ isOpen, onClose, onSelectHistoryQuery }: SidebarProps)
   return (
     <>
       {/* Sidebar */}
-      <div className={`fixed top-0 left-0 h-full w-60 dark:bg-[#1e1f20] bg-white border-r border-gray-200 dark:border-gray-800 transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-250 ease-in-out z-[1000] flex flex-col`}>
+      <div className={`fixed top-0 left-0 h-full w-60 bg-[--surface] border-r border-[--card-border] transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-200 ease-in-out z-[100000] flex flex-col`}>
 
         {/* Top nav */}
         <div className="flex-shrink-0 px-3 pt-4 pb-2">
           <div className="flex items-center justify-between mb-4">
             <a href="/">
-              <Image src="/images/bg.png" alt="Lookinit" width={90} height={32} className="dark:hidden" style={{ height: '28px', width: 'auto' }} priority />
-              <Image src="/images/bgw.png" alt="Lookinit" width={90} height={32} className="hidden dark:block" style={{ height: '28px', width: 'auto' }} priority />
+              <Image src="/images/bg.png"  alt="Lookinit" width={90} height={28} className="dark:hidden"        style={{ height: '26px', width: 'auto' }} priority />
+              <Image src="/images/bgw.png" alt="Lookinit" width={90} height={28} className="hidden dark:block"  style={{ height: '26px', width: 'auto' }} priority />
             </a>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-[#3b3e41]"
+              className="p-1.5 rounded-md text-[--text-muted] hover:text-[--text-primary] hover:bg-[--card-hover] transition-colors"
             >
-              <X size={18} className="text-gray-600 dark:text-gray-300" />
+              <X size={16} />
             </button>
           </div>
 
           <a
             href="./"
-            className="flex items-center gap-2.5 px-2 py-2 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#3b3e41] font-medium"
+            className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm text-[--text-primary] hover:bg-[--card-hover] font-medium transition-colors"
           >
-            <NotePencil size={18} /> New Chat
+            <NotePencil size={16} weight="bold" /> New Chat
           </a>
 
           {user && (
             <Link
               href="/account"
               onClick={onClose}
-              className="flex items-center gap-2.5 px-2 py-2 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#3b3e41]"
+              className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm text-[--text-muted] hover:text-[--text-primary] hover:bg-[--card-hover] transition-colors"
             >
-              <UserCircle size={18} /> My Account
+              <UserCircle size={16} /> My Account
             </Link>
           )}
 
@@ -124,13 +124,13 @@ export function Sidebar({ isOpen, onClose, onSelectHistoryQuery }: SidebarProps)
             target="_blank"
             rel="noopener noreferrer"
             onClick={onClose}
-            className="flex items-center gap-2.5 px-2 py-2 rounded-md text-sm text-indigo-500 dark:text-indigo-400 hover:bg-gray-100 dark:hover:bg-[#3b3e41] font-medium"
+            className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-sm text-indigo-400 hover:bg-[--card-hover] font-medium transition-colors"
           >
-            <Crown size={18} /> Upgrade to Pro
+            <Crown size={16} weight="fill" /> Upgrade to Pro
           </a>
         </div>
 
-        <div className="mx-3 h-px bg-gray-200 dark:bg-gray-800 flex-shrink-0" />
+        <div className="mx-3 h-px bg-[--divider] flex-shrink-0" />
 
         {/* Search history */}
         {user ? (
@@ -143,19 +143,19 @@ export function Sidebar({ isOpen, onClose, onSelectHistoryQuery }: SidebarProps)
 
         {/* Theme toggle */}
         <div className="flex-shrink-0 px-3 pb-2">
-          <div className="flex items-center gap-1 p-1 rounded-lg bg-gray-100 dark:bg-[#2a2b2c]">
+          <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-[--card-hover]">
             {([
-              { value: 'light', icon: <Sun size={14} />, label: 'Light' },
-              { value: 'dark',  icon: <Moon size={14} />, label: 'Dark'  },
-              { value: 'system',icon: <Monitor size={14} />, label: 'Auto'  },
+              { value: 'light',  icon: <Sun size={13} />,     label: 'Light' },
+              { value: 'dark',   icon: <Moon size={13} />,    label: 'Dark'  },
+              { value: 'system', icon: <Monitor size={13} />, label: 'Auto'  },
             ] as const).map(({ value, icon, label }) => (
               <button
                 key={value}
                 onClick={() => setTheme(value)}
-                className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-md text-xs font-medium transition-colors
+                className={`flex-1 flex items-center justify-center gap-1 py-1.5 rounded-md text-xs font-medium transition-all
                   ${theme === value
-                    ? 'bg-white dark:bg-[#3b3e41] text-gray-900 dark:text-gray-100 shadow-sm'
-                    : 'text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                    ? 'bg-[--card-bg] text-[--text-primary] shadow-sm border border-[--card-border]'
+                    : 'text-[--text-muted] hover:text-[--text-primary]'
                   }`}
               >
                 {icon} {label}
@@ -167,30 +167,30 @@ export function Sidebar({ isOpen, onClose, onSelectHistoryQuery }: SidebarProps)
         {/* Bottom: user info + logout */}
         {user && (
           <>
-            <div className="mx-3 h-px bg-gray-200 dark:bg-gray-800 flex-shrink-0" />
+            <div className="mx-3 h-px bg-[--divider] flex-shrink-0" />
             <div className="flex-shrink-0 px-3 py-3">
               <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2 min-w-0">
+                <div className="flex items-center gap-2.5 min-w-0">
                   {user.photoURL ? (
-                    <img src={user.photoURL} alt="" className="w-7 h-7 rounded-full flex-shrink-0" />
+                    <img src={user.photoURL} alt="" referrerPolicy="no-referrer" className="w-7 h-7 rounded-full flex-shrink-0" />
                   ) : (
-                    <div className="w-7 h-7 rounded-full bg-indigo-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                    <div className="w-7 h-7 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 text-xs font-bold flex-shrink-0">
                       {(user.displayName || user.email || 'U')[0].toUpperCase()}
                     </div>
                   )}
                   <div className="min-w-0">
-                    <p className="text-xs font-medium text-gray-800 dark:text-gray-100 truncate">
+                    <p className="text-xs font-medium text-[--text-primary] truncate">
                       {user.displayName || 'User'}
                     </p>
-                    <p className="text-[11px] text-gray-400 truncate">{user.email}</p>
+                    <p className="text-[11px] text-[--text-muted] truncate">{user.email}</p>
                   </div>
                 </div>
                 <button
                   onClick={logout}
-                  className="p-1.5 rounded-md text-gray-400 hover:text-red-500 hover:bg-gray-100 dark:hover:bg-[#3b3e41] flex-shrink-0"
+                  className="p-1.5 rounded-md text-[--text-muted] hover:text-red-400 hover:bg-[--card-hover] flex-shrink-0 transition-colors"
                   title="Sign out"
                 >
-                  <SignOut size={16} />
+                  <SignOut size={15} />
                 </button>
               </div>
             </div>
@@ -200,7 +200,7 @@ export function Sidebar({ isOpen, onClose, onSelectHistoryQuery }: SidebarProps)
 
       {/* Overlay */}
       {isOpen && (
-        <div className="fixed inset-0 bg-black/40 z-[999]" onClick={onClose} />
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[99999]" onClick={onClose} />
       )}
     </>
   );

@@ -4,270 +4,183 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
+    --background: 0 0% 98%;
+    --foreground: 240 10% 4%;
+    --muted: 240 5% 94%;
+    --muted-foreground: 240 4% 46%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
+    --popover-foreground: 240 10% 4%;
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --primary: 240 5.9% 10%;
+    --card-foreground: 240 10% 4%;
+    --border: 240 6% 90%;
+    --input: 240 6% 90%;
+    --primary: 240 6% 10%;
     --primary-foreground: 0 0% 98%;
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: ;
-    --destructive: 0 84.2% 60.2%;
+    --secondary: 240 5% 94%;
+    --secondary-foreground: 240 6% 10%;
+    --accent: 240 5% 94%;
+    --accent-foreground: 240 6% 10%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --ring: 240 5% 64.9%;
-    --radius: 0.5rem;
+    --ring: 240 5% 65%;
+    --radius: 0.75rem;
+
+    /* App design tokens — light */
+    --surface:       #f8f8f8;
+    --card-bg:       #ffffff;
+    --card-border:   rgba(0, 0, 0, 0.07);
+    --card-hover:    #f3f3f3;
+    --text-primary:  #0f0f0f;
+    --text-muted:    rgba(0, 0, 0, 0.45);
+    --divider:       rgba(0, 0, 0, 0.07);
   }
 
   .dark {
-    --background: 210, 4%, 11%;
-    --foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: ;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 85.7% 97.3%;
-    --ring: 240 3.7% 15.9%;
+    --background: 240 6% 7%;
+    --foreground: 0 0% 97%;
+    --muted: 240 4% 13%;
+    --muted-foreground: 240 5% 55%;
+    --popover: 240 6% 7%;
+    --popover-foreground: 0 0% 97%;
+    --card: 240 6% 9%;
+    --card-foreground: 0 0% 97%;
+    --border: 240 4% 14%;
+    --input: 240 4% 14%;
+    --primary: 0 0% 97%;
+    --primary-foreground: 240 6% 10%;
+    --secondary: 240 4% 13%;
+    --secondary-foreground: 0 0% 97%;
+    --accent: 240 4% 13%;
+    --accent-foreground: 0 0% 97%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 0 86% 97%;
+    --ring: 240 4% 20%;
+
+    /* App design tokens — dark */
+    --surface:       #0d0d0f;
+    --card-bg:       #111113;
+    --card-border:   rgba(255, 255, 255, 0.07);
+    --card-hover:    #18181b;
+    --text-primary:  #f2f2f2;
+    --text-muted:    rgba(255, 255, 255, 0.42);
+    --divider:       rgba(255, 255, 255, 0.07);
   }
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-
-  body {
-    @apply bg-background text-foreground;
-  }
+  * { @apply border-border; }
+  body { @apply bg-background text-foreground; }
 }
 
-.keyboard-visible {
-  transform: translateY(-100%);
-  transition: transform 0.3s ease-in-out;
+/* ─── Scrollbar ─── */
+.scrollbar-thin { scrollbar-width: thin; }
+.scrollbar-thin::-webkit-scrollbar { width: 4px; }
+.scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(128,128,128,0.3); border-radius: 4px; }
+.scrollbar-thin::-webkit-scrollbar-thumb:hover { background: rgba(128,128,128,0.5); }
+
+/* ─── Header animation ─── */
+.header-hidden  { transform: translateY(-100%); transition: transform 0.25s ease; }
+.header-visible { transform: translateY(0);     transition: transform 0.25s ease; }
+
+/* ─── Layout helpers ─── */
+.keyboard-visible { transform: translateY(-100%); transition: transform 0.3s ease-in-out; }
+.bring-to-front   { z-index: 99999 !important; }
+.bring-to-front-modal { z-index: 9999999 !important; }
+
+/* ─── Leaflet ─── */
+.leaflet-popup-content p { margin: 0 !important; }
+
+/* ─── YouTube clip ─── */
+.clip-yt-img { margin-top: -24px; clip-path: inset(30px 0 30px 0); }
+
+/* ─── TradingView mobile ─── */
+@media (max-width: 640px) {
+  .my-5.tradingview-widget-container { height: 150px !important; }
 }
 
-.leaflet-popup-content p {
-  margin: 0 !important;
-}
-
-/* leaflet made me do it.. */
-.bring-to-front {
-  z-index: 99999 !important;
-}
-
-.bring-to-front-modal {
-  z-index: 99999999 !important;
-}
-
-.rate-limit-modal {
-  z-index: 999999999999 !important;
-}
-
-/* tradingview mobile */
-.my-5.tradingview-widget-container {
-  height: 150px !important;
-}
-
-/* Markdown styles */
-/* Markdown styles */
+/* ─── Markdown ─── */
 .markdown-container {
-  font-family: Arial, sans-serif;
-  line-height: 1.6;
-  color: #333;
-  font-size: 16px;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  line-height: 1.75;
+  font-size: 15px;
+  color: var(--text-primary);
 }
 
 .markdown-container h1,
 .markdown-container h2,
 .markdown-container h3,
-.markdown-container h4,
-.markdown-container h5,
-.markdown-container h6 {
-  font-weight: bold;
-  margin-top: 1em;
-  margin-bottom: 0.5em;
-  border-bottom: 1px solid #ddd;
-  padding-bottom: 0.3em;
-}
-
-.markdown-container h1 {
-  font-size: 1.5em;
-}
-
-.markdown-container h2 {
-  font-size: 1.4em;
-}
-
-.markdown-container h3 {
-  font-size: 1.3em;
-}
-
 .markdown-container h4 {
-  font-size: 1.2em;
+  font-weight: 600;
+  margin-top: 1.4em;
+  margin-bottom: 0.5em;
+  color: var(--text-primary);
 }
 
-.markdown-container h5 {
-  font-size: 1.1em;
-}
+.markdown-container h1 { font-size: 1.4em; }
+.markdown-container h2 { font-size: 1.25em; }
+.markdown-container h3 { font-size: 1.1em; }
+.markdown-container h4 { font-size: 1em; }
 
-.markdown-container h6 {
-  font-size: 1em;
-}
-
-.markdown-container p {
-  margin-bottom: 1em;
-}
-
-.markdown-container strong {
-  font-weight: bold;
-}
-
-.markdown-container em {
-  font-style: italic;
-}
+.markdown-container p { margin-bottom: 0.9em; }
+.markdown-container strong { font-weight: 600; }
+.markdown-container em { font-style: italic; }
 
 .markdown-container a {
-  color: #83aff8;
-  text-decoration: underline;
-  font-weight: 500; /* Optional: Slightly bold for emphasis */
-  transition: color 0.3s ease-in-out; /* Smooth transition for hover effects */
+  color: #818cf8;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(129,140,248,0.3);
+  transition: border-color 0.2s, color 0.2s;
 }
-
-.markdown-container a:hover {
-  color: #2673f3; /* Darker shade on hover */
-  text-decoration: underline; /* Optional: Show underline on hover */
-}
+.markdown-container a:hover { color: #a5b4fc; border-bottom-color: rgba(165,180,252,0.5); }
 
 .markdown-container code {
-  font-family: monospace;
-  font-size: 0.9em;
-  padding: 0.2em 0.4em;
-  background-color: #313436;;
-  border-radius: 3px;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.85em;
+  padding: 0.15em 0.45em;
+  background: rgba(129,140,248,0.1);
+  border: 1px solid rgba(129,140,248,0.15);
+  border-radius: 5px;
+  color: #a5b4fc;
 }
 
 .markdown-container pre {
-  font-family: monospace;
-  font-size: 0.9em;
-  padding: 1em;
-  overflow: auto;
-  background-color: #313436;
-  border-radius: 3px;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.85em;
+  padding: 1.1em 1.2em;
+  overflow-x: auto;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  margin: 1em 0;
 }
-
 .markdown-container pre code {
   padding: 0;
-  background-color: transparent;
+  background: transparent;
+  border: none;
+  color: inherit;
 }
 
 .markdown-container ul,
-.markdown-container ol {
-  margin-bottom: 1em;
-  padding-left: 2em;
-}
-
-.markdown-container ul li,
-.markdown-container ol li {
-  margin-bottom: 0.5em;
-}
-
-.markdown-container ul li {
-  list-style-type: disc;
-}
-
-.markdown-container ol li {
-  list-style-type: decimal;
-}
+.markdown-container ol { margin-bottom: 1em; padding-left: 1.6em; }
+.markdown-container li { margin-bottom: 0.35em; }
+.markdown-container ul li { list-style-type: disc; }
+.markdown-container ol li { list-style-type: decimal; }
 
 .markdown-container blockquote {
   margin: 1em 0;
-  padding: 0.5em 1em;
-  border-left: 4px solid #ddd;
-  color: #666;
+  padding: 0.6em 1em;
+  border-left: 3px solid rgba(129,140,248,0.4);
+  color: var(--text-muted);
+  background: rgba(129,140,248,0.05);
+  border-radius: 0 6px 6px 0;
 }
 
 .markdown-container hr {
   border: none;
-  border-top: 1px solid #ddd;
+  border-top: 1px solid var(--divider);
   margin: 1.5em 0;
 }
 
-.fixed.inset-0.z-50.bg-black\/80.data-\[state\=open\]\:animate-in.data-\[state\=closed\]\:animate-out.data-\[state\=closed\]\:fade-out-0.data-\[state\=open\]\:fade-in-0 {
-  z-index: 99999;
-}
-
-.clip-yt-img {
-  margin-top: -24px;
-  clip-path: inset(30px 0 30px 0);
-}
-
-/* Smooth hide and show transition for the header */
-.header-hidden {
-  transform: translateY(-100%);
-  transition: transform 0.3s ease-in-out;
-}
-
-.header-visible {
-  transform: translateY(0);
-  transition: transform 0.3s ease-in-out;
-}
-@media (max-width: 640px) {
-  .header-buttons {
-    position: absolute;
-    right: 1rem;
-    top: 1rem;
-  }
-  /* Custom scrollbar styles */
-.scrollbar-thin {
-  scrollbar-width: thin;
-}
-
-.scrollbar-thumb-gray-400::-webkit-scrollbar-thumb {
-  background-color: rgb(156 163 175);
-  border-radius: 4px;
-}
-
-.dark .scrollbar-thumb-gray-600::-webkit-scrollbar-thumb {
-  background-color: rgb(75 85 99);
-}
-
-.scrollbar-track-transparent::-webkit-scrollbar-track {
-  background-color: transparent;
-}
-
-.scrollbar-thin::-webkit-scrollbar {
-  width: 6px;
-}
-
-.scrollbar-thin::-webkit-scrollbar-thumb {
-  border-radius: 4px;
-}
-
-.scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background-color: rgb(107 114 128);
-}
-
-.dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background-color: rgb(55 65 81);
-}
-
-}
-
+/* ─── Radix dialog z-index ─── */
+.fixed.inset-0.z-50.bg-black\/80 { z-index: 9999; }
