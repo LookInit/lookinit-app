@@ -16,8 +16,8 @@ export const mentionToolConfig = {
         { id: 'groq/compound-mini', name: 'Groq Compound Mini', logo: 'https://asset.brandfetch.io/idxygbEPCQ/idzCyF-I44.png?updated=1668515712972', functionName: 'streamChatCompletion', enableRAG: true },
 
         // Portkey --- ANTHROPIC
-        { id: 'claude-3-5-sonnet-20241022', name: 'Anthropic Claude 3.5 Sonnet', logo: 'https://asset.brandfetch.io/idmJWF3N06/idq0tv4tfX.svg?updated=1693981852273', functionName: 'portKeyAIGateway', enableRAG: true },
-        { id: 'claude-3-haiku-20240307', name: 'Anthropic Claude 3 Haiku', logo: 'https://asset.brandfetch.io/idmJWF3N06/idq0tv4tfX.svg?updated=1693981852273', functionName: 'portKeyAIGateway', enableRAG: true },
+        { id: 'claude-sonnet-4-6', name: 'Anthropic Claude Sonnet 4.6', logo: 'https://asset.brandfetch.io/idmJWF3N06/idq0tv4tfX.svg?updated=1693981852273', functionName: 'portKeyAIGateway', enableRAG: true },
+        { id: 'claude-haiku-4-5', name: 'Anthropic Claude Haiku 4.5', logo: 'https://asset.brandfetch.io/idmJWF3N06/idq0tv4tfX.svg?updated=1693981852273', functionName: 'portKeyAIGateway', enableRAG: true },
 
         // Portkey --- COHERE
         { id: 'command-a-03-2025', name: 'Cohere Command A', logo: 'https://asset.brandfetch.io/idyni_Sw9h/idsvG5y-ZU.png?updated=1710782726843', functionName: 'portKeyAIGateway', enableRAG: true },
