@@ -32,21 +32,27 @@ export async function checkRateLimit(streamable: any, userId?: string): Promise<
   let tier: Tier;
   let key: string;
 
-  if (userId) {
-    // Look up tier from Redis (written by Stripe webhook — cannot be spoofed by client)
-    const storedTier = await getRedis().get<string>(subTierKey(userId));
-    tier = (storedTier === 'pro' || storedTier === 'basic') ? storedTier : 'free';
-    key = `user:${userId}`;
-  } else {
-    tier = 'anonymous';
-    const h = headers();
-    key = h.get('x-forwarded-for') ?? h.get('x-real-ip') ?? h.get('cf-connecting-ip') ?? 'unknown';
-  }
+  try {
+    if (userId) {
+      // Look up tier from Redis (written by Stripe webhook — cannot be spoofed by client)
+      const storedTier = await getRedis().get<string>(subTierKey(userId));
+      tier = (storedTier === 'pro' || storedTier === 'basic') ? storedTier : 'free';
+      key = `user:${userId}`;
+    } else {
+      tier = 'anonymous';
+      const h = headers();
+      key = h.get('x-forwarded-for') ?? h.get('x-real-ip') ?? h.get('cf-connecting-ip') ?? 'unknown';
+    }
 
-  const { success } = await getLimiters()[tier].limit(key);
+    const { success } = await getLimiters()[tier].limit(key);
 
-  if (!success) {
-    streamable.done({ status: 'rateLimitReached' });
+    if (!success) {
+      streamable.done({ status: 'rateLimitReached' });
+    }
+    return success;
+  } catch (error) {
+    // Redis unreachable — fail open so searches still work
+    console.error('Rate limit check failed (Redis unreachable):', error);
+    return true;
   }
-  return success;
 }
