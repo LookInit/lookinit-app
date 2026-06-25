@@ -34,7 +34,7 @@ export const CONFIG = {
     host: "smtp.sendgrid.net",
     port: 587,
     secure: false,
-    from: "team@lookinit.com",
-    notificationEmail: "team@lookinit.com"
+    from: "hello@lookinit.com",
+    notificationEmail: "hello@lookinit.com"
   },
 };

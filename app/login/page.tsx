@@ -20,7 +20,7 @@ export default function LoginPage() {
     // Simulate network delay for premium feel
     await new Promise(resolve => setTimeout(resolve, 800));
     
-    if (email === 'admin@lookinit.com' && password === 'lookinit@123') {
+    if (email === 'hello@lookinit.com' && password === 'lookinit@123') {
       localStorage.setItem('isAuthenticated', 'true');
       router.push('/admin');
     } else {

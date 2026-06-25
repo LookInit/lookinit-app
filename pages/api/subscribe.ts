@@ -16,7 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Send a dynamic template email using SendGrid
       await sendgrid.send({
         to: email, // The recipient's email address
-        from: 'admin@lookinit.com', // Your verified sender email address
+        from: 'hello@lookinit.com', // Your verified sender email address
         templateId: process.env.SENDGRID_DYNAMIC_TEMPLATE_ID || '', // Use template ID from .env
         dynamicTemplateData: {
           name: name || 'Subscriber', // Pass dynamic data for placeholders
