@@ -63,6 +63,8 @@ async function myAction(userMessage: string, mentionTool: string | null, logo: s
           followUp,
           semanticCacheKey: userMessage,
         });
+
+        streamable.done({ llmResponseEnd: true });
       }
     } catch (error) {
       console.error('Action error:', error);

@@ -7,8 +7,8 @@ export const mentionToolConfig = {
         { id: 'meta-llama/llama-4-scout-17b-16e-instruct', name: 'Groq Llama4 Scout', logo: 'https://asset.brandfetch.io/idxygbEPCQ/idzCyF-I44.png?updated=1668515712972', functionName: 'streamChatCompletion', enableRAG: true },
         { id: 'qwen/qwen3-32b', name: 'Qwen3-32b', logo: 'https://avatars.githubusercontent.com/u/141221163?s=200&v=4', functionName: 'streamChatCompletion', enableRAG: true },
 
-        // DeepSeek
-        { id: 'openai/gpt-oss-120b', name: 'DeepSeek R2 (via Groq)', logo: 'https://avatars.githubusercontent.com/u/148330874?s=200&v=4', functionName: 'streamChatCompletion', enableRAG: true },
+        // OpenAI open-weight model, hosted on Groq
+        { id: 'openai/gpt-oss-120b', name: 'GPT-OSS 120b (via Groq)', logo: 'https://avatars.githubusercontent.com/u/148330874?s=200&v=4', functionName: 'streamChatCompletion', enableRAG: true },
     
         
         // Groq compound models
