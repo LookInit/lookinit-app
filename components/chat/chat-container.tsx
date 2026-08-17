@@ -61,6 +61,7 @@ export function ChatContainer({
                 semanticCacheKey={message.semanticCacheKey}
                 isolatedView={true}
                 logo={message.logo}
+                isStreaming={message.isStreaming}
               />
             )
           ) : (
@@ -79,13 +80,14 @@ export function ChatContainer({
                 {message.places && message.places.length > 0 && (
                   <MapComponent key={`map-${index}`} places={message.places} />
                 )}
-                <LLMResponseComponent 
-                  llmResponse={message.content} 
-                  currentLlmResponse={currentLlmResponse} 
-                  index={index} 
-                  semanticCacheKey={message.semanticCacheKey} 
+                <LLMResponseComponent
+                  llmResponse={message.content}
+                  currentLlmResponse={currentLlmResponse}
+                  index={index}
+                  semanticCacheKey={message.semanticCacheKey}
                   key={`llm-response-${index}`}
                   isolatedView={false}
+                  isStreaming={message.isStreaming}
                 />
                 {message.followUp && (
                   <div className="flex flex-col">

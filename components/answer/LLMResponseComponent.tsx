@@ -44,9 +44,16 @@ interface LLMResponseComponentProps {
     semanticCacheKey: string;
     isolatedView: boolean;
     logo?: string;
+    isStreaming?: boolean;
 }
 
-const LLMResponseComponent = ({ llmResponse, currentLlmResponse, index, semanticCacheKey, isolatedView, logo }: LLMResponseComponentProps) => {
+const ErrorState = () => (
+    <div className="bg-[--card-bg] border border-[--card-border] rounded-xl p-4 mt-4 text-[--text-muted] text-sm">
+        Couldn't generate a response for this one. Try refreshing or asking again.
+    </div>
+);
+
+const LLMResponseComponent = ({ llmResponse, currentLlmResponse, index, semanticCacheKey, isolatedView, logo, isStreaming }: LLMResponseComponentProps) => {
     const { clearSemanticCache } = useActions<typeof AI>();
     const [showCacheCleared, setShowCacheCleared] = useState(false);
     const [copied, setCopied] = useState(false);
@@ -102,6 +109,8 @@ const LLMResponseComponent = ({ llmResponse, currentLlmResponse, index, semantic
                         <StreamingComponent currentLlmResponse={currentLlmResponse} />
                     )}
                 </>
+            ) : isStreaming === false ? (
+                <ErrorState />
             ) : (
                 <SkeletonLoader />
             )}
