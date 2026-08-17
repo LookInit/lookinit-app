@@ -10,8 +10,11 @@ export async function getAdminApp() {
 
   if (getApps().length === 0) {
     try {
-      const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-      const privateKey = process.env.FIREBASE_PRIVATE_KEY;
+      // Strip accidental wrapping quotes — unlike a .env file parser, most
+      // env var UIs (Netlify included) store the pasted value literally.
+      const unquote = (v: string) => v.trim().replace(/^['"]|['"]$/g, '');
+      const clientEmail = process.env.FIREBASE_CLIENT_EMAIL && unquote(process.env.FIREBASE_CLIENT_EMAIL);
+      const privateKey = process.env.FIREBASE_PRIVATE_KEY && unquote(process.env.FIREBASE_PRIVATE_KEY);
       if (!clientEmail || !privateKey) {
         throw new Error('FIREBASE_CLIENT_EMAIL and FIREBASE_PRIVATE_KEY must be set');
       }
