@@ -5,13 +5,10 @@ import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';
 import { Document as DocumentInterface } from 'langchain/document';
 import { OpenAIEmbeddings } from '@langchain/openai';
-import { OllamaEmbeddings } from "@langchain/community/embeddings/ollama";
-let embeddings: OllamaEmbeddings | OpenAIEmbeddings | undefined;
-function getEmbeddings(): OllamaEmbeddings | OpenAIEmbeddings {
+let embeddings: OpenAIEmbeddings | undefined;
+function getEmbeddings(): OpenAIEmbeddings {
     if (!embeddings) {
-        embeddings = config.useOllamaEmbeddings
-            ? new OllamaEmbeddings({ model: config.embeddingsModel, baseUrl: "http://localhost:11434" })
-            : new OpenAIEmbeddings({ modelName: config.embeddingsModel });
+        embeddings = new OpenAIEmbeddings({ modelName: config.embeddingsModel });
     }
     return embeddings;
 }
