@@ -1,12 +1,10 @@
 import { NextResponse } from 'next/server';
-import Stripe from 'stripe';
+import { getStripeClient } from '@/lib/stripe';
 import { CONFIG } from '@/lib/config';
 import { getCustomerIdFromUserId } from '@/lib/db';
 import { verifyIdToken } from '@/app/api/search-history/auth-utils';
 
-const stripe = new Stripe(process.env.STRIPE_API_KEY!, {
-  apiVersion: '2025-02-24.acacia',
-});
+const stripe = getStripeClient();
 
 export async function POST(request: Request) {
   try {

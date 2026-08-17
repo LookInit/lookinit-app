@@ -55,7 +55,7 @@ const SearchResultsComponent = ({ searchResults }: { searchResults: SearchResult
                             rel="noopener noreferrer"
                             className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[--card-hover] hover:bg-[--divider] border border-transparent hover:border-[--card-border] transition-all w-[calc(50%-4px)] md:w-[calc(25%-6px)] min-w-0"
                         >
-                            {result.favicon.length > 0 && (
+                            {typeof result.favicon === 'string' && result.favicon.length > 0 && (
                                 <>
                                     {!loadedFavicons[index] && (
                                         <div className="w-4 h-4 rounded bg-[--divider] flex-shrink-0 animate-pulse" />

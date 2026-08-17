@@ -28,7 +28,7 @@ export async function clearSemanticCache(userMessage: string) {
 }
 
 export async function initializeSemanticCache() {
-    if (config.useSemanticCache) {
+    if (config.useSemanticCache && !semanticCache) {
         const index = new Index();
         semanticCache = new SemanticCache({ index, minProximity: 0.95 });
     }

@@ -12,7 +12,9 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const isPublic = PUBLIC_PATHS.some((p) => pathname?.startsWith(p));
+  // Home page is public — anonymous users get a limited number of free
+  // searches (see lib/search-counter.ts) before being asked to sign in.
+  const isPublic = pathname === '/' || PUBLIC_PATHS.some((p) => pathname?.startsWith(p));
 
   useEffect(() => {
     if (!loading && !user && !isPublic) {

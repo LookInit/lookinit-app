@@ -32,8 +32,10 @@ export function BlogModal({
   useEffect(() => {
     if (post && (mode === 'edit' || mode === 'view')) {
       setFormData(post); // Populate form data for edit or view mode
+    } else if (mode === 'create') {
+      setFormData({ title: '', content: '', author: '', tags: [], status: 'draft' }); // Reset stale data from a previous edit
     }
-  }, [post, mode]);
+  }, [post, mode, open]);
 
   const validateForm = () => {
     const newErrors: { content?: string } = {};

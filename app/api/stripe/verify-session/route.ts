@@ -1,16 +1,14 @@
 export const runtime = 'nodejs'; // This is crucial - must be at the top
 
 import { NextResponse } from 'next/server';
-import Stripe from 'stripe';
+import { getStripeClient } from '@/lib/stripe';
 import { upsertUserSubscription } from '@/lib/db';
 import { getAdminAuth, getAdminDb} from '@/lib/firebase-admin';
 
 // Check if we're in the build phase
 const isBuildPhase = process.env.NODE_ENV === 'production' && process.env.NEXT_PHASE === 'phase-production-build';
 
-const stripe = new Stripe(process.env.STRIPE_API_KEY!, {
-  apiVersion: '2025-02-24.acacia',
-});
+const stripe = getStripeClient();
 
 export async function POST(request: Request) {
   // Skip during build phase

@@ -1,6 +1,7 @@
 export const runtime = "nodejs";
 import { NextResponse } from 'next/server';
-import Stripe from 'stripe';
+import type Stripe from 'stripe';
+import { getStripeClient } from '@/lib/stripe';
 import { upsertUserSubscription, updateUserSubscriptionStatus } from '@/lib/db';
 import { Redis } from '@upstash/redis';
 import { subTierKey } from '@/lib/subscription-tiers';
@@ -8,9 +9,7 @@ import { subTierKey } from '@/lib/subscription-tiers';
 // Check if we're in the build phase
 const isBuildPhase = process.env.NODE_ENV === 'production' && process.env.NEXT_PHASE === 'phase-production-build';
 
-const stripe = new Stripe(process.env.STRIPE_API_KEY || 'dummy_key', {
-  apiVersion: '2025-02-24.acacia',
-});
+const stripe = getStripeClient();
 
 // This is your Stripe webhook secret for testing your endpoint locally.
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || 'dummy_secret';

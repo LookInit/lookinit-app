@@ -82,22 +82,19 @@ export async function processAndVectorizeContent(
     textChunkOverlap = config.textChunkOverlap,
     numberOfSimilarityResults = config.numberOfSimilarityResults,
 ): Promise<DocumentInterface[]> {
-    const allResults: DocumentInterface[] = [];
     try {
-        for (let i = 0; i < contents.length; i++) {
-            const content = contents[i];
-            if (content.html.length > 0) {
-                try {
-                    const splitText = await new RecursiveCharacterTextSplitter({ chunkSize: textChunkSize, chunkOverlap: textChunkOverlap }).splitText(content.html);
-                    const vectorStore = await MemoryVectorStore.fromTexts(splitText, { title: content.title, link: content.link }, getEmbeddings());
-                    const contentResults = await vectorStore.similaritySearch(query, numberOfSimilarityResults);
-                    allResults.push(...contentResults);
-                } catch (error) {
-                    console.error(`Error processing content for ${content.link}:`, error);
-                }
+        const perContentResults = await Promise.all(contents.map(async (content) => {
+            if (content.html.length === 0) return [];
+            try {
+                const splitText = await new RecursiveCharacterTextSplitter({ chunkSize: textChunkSize, chunkOverlap: textChunkOverlap }).splitText(content.html);
+                const vectorStore = await MemoryVectorStore.fromTexts(splitText, { title: content.title, link: content.link }, getEmbeddings());
+                return await vectorStore.similaritySearch(query, numberOfSimilarityResults);
+            } catch (error) {
+                console.error(`Error processing content for ${content.link}:`, error);
+                return [];
             }
-        }
-        return allResults;
+        }));
+        return perContentResults.flat();
     } catch (error) {
         console.error('Error processing and vectorizing content:', error);
         throw error;

@@ -41,7 +41,15 @@ export async function checkRateLimit(streamable: any, userId?: string): Promise<
     } else {
       tier = 'anonymous';
       const h = headers();
-      key = h.get('x-forwarded-for') ?? h.get('x-real-ip') ?? h.get('cf-connecting-ip') ?? 'unknown';
+      const forwardedFor = h.get('x-forwarded-for')?.split(',')[0]?.trim();
+      const ip = forwardedFor || h.get('x-real-ip') || h.get('cf-connecting-ip');
+      if (!ip) {
+        // No client IP available to key on — don't collapse every anonymous
+        // caller into one shared bucket. Fail open, same as a Redis outage.
+        console.error('Rate limit check skipped: no client IP header present');
+        return true;
+      }
+      key = ip;
     }
 
     const { success } = await getLimiters()[tier].limit(key);
