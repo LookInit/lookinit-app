@@ -38,7 +38,7 @@ async function myAction(userMessage: string, mentionTool: string | null, logo: s
           getImages(userMessage),
           getSearchResults(userMessage),
           getVideos(userMessage),
-          functionCalling(userMessage),
+          config.useFunctionCalling ? functionCalling(userMessage) : Promise.resolve(undefined),
         ]);
 
         streamable.update({ searchResults: sources, images, videos });

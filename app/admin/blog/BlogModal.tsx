@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { X, Plus, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { auth } from '@/lib/firebase';
 
 export function BlogModal({
   open,
@@ -59,9 +60,13 @@ export function BlogModal({
         mode === 'edit' && post?._id
           ? `/api/blog?id=${post._id}` // Corrected endpoint for PUT
           : '/api/blog'; // Default endpoint for POST
+      const idToken = await auth.currentUser?.getIdToken();
       const response = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(idToken ? { authorization: `Bearer ${idToken}` } : {}),
+        },
         body: JSON.stringify(formData), // Ensure formData includes all necessary fields
       });
 

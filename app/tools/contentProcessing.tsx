@@ -6,16 +6,14 @@ import { MemoryVectorStore } from 'langchain/vectorstores/memory';
 import { Document as DocumentInterface } from 'langchain/document';
 import { OpenAIEmbeddings } from '@langchain/openai';
 import { OllamaEmbeddings } from "@langchain/community/embeddings/ollama";
-let embeddings: OllamaEmbeddings | OpenAIEmbeddings;
-if (config.useOllamaEmbeddings) {
-    embeddings = new OllamaEmbeddings({
-        model: config.embeddingsModel,
-        baseUrl: "http://localhost:11434"
-    });
-} else {
-    embeddings = new OpenAIEmbeddings({
-        modelName: config.embeddingsModel
-    });
+let embeddings: OllamaEmbeddings | OpenAIEmbeddings | undefined;
+function getEmbeddings(): OllamaEmbeddings | OpenAIEmbeddings {
+    if (!embeddings) {
+        embeddings = config.useOllamaEmbeddings
+            ? new OllamaEmbeddings({ model: config.embeddingsModel, baseUrl: "http://localhost:11434" })
+            : new OpenAIEmbeddings({ modelName: config.embeddingsModel });
+    }
+    return embeddings;
 }
 
 interface SearchResult {
@@ -30,7 +28,7 @@ interface ContentResult extends SearchResult {
 
 //  Fetch contents of top 10 search results
 export async function get10BlueLinksContents(sources: SearchResult[]): Promise<ContentResult[]> {
-    async function fetchWithTimeout(url: string, options: RequestInit = {}, timeout = 800): Promise<Response> {
+    async function fetchWithTimeout(url: string, options: RequestInit = {}, timeout = 4000): Promise<Response> {
         try {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), timeout);
@@ -56,7 +54,7 @@ export async function get10BlueLinksContents(sources: SearchResult[]): Promise<C
     }
     const promises = sources.map(async (source): Promise<ContentResult | null> => {
         try {
-            const response = await fetchWithTimeout(source.link, {}, 800);
+            const response = await fetchWithTimeout(source.link, {}, 4000);
             if (!response.ok) {
                 throw new Error(`Failed to fetch ${source.link}. Status: ${response.status}`);
             }
@@ -91,7 +89,7 @@ export async function processAndVectorizeContent(
             if (content.html.length > 0) {
                 try {
                     const splitText = await new RecursiveCharacterTextSplitter({ chunkSize: textChunkSize, chunkOverlap: textChunkOverlap }).splitText(content.html);
-                    const vectorStore = await MemoryVectorStore.fromTexts(splitText, { title: content.title, link: content.link }, embeddings);
+                    const vectorStore = await MemoryVectorStore.fromTexts(splitText, { title: content.title, link: content.link }, getEmbeddings());
                     const contentResults = await vectorStore.similaritySearch(query, numberOfSimilarityResults);
                     allResults.push(...contentResults);
                 } catch (error) {

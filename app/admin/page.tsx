@@ -1,13 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { FiTrendingUp, FiUsers, FiBarChart2, FiFileText, FiRefreshCw } from 'react-icons/fi';
 import { toast } from 'sonner';
 
 export default function AdminDashboardPage() {
-  const router = useRouter();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState({
     posts: 142,
@@ -17,17 +14,9 @@ export default function AdminDashboardPage() {
   });
 
   useEffect(() => {
-    const token = localStorage.getItem('isAuthenticated');
-    if (!token) {
-      router.push('/login');
-    } else {
-      // Simulate API call with timeout
-      setTimeout(() => {
-        setIsAuthenticated(true);
-        setIsLoading(false);
-      }, 1000);
-    }
-  }, [router]);
+    // Auth is already enforced by the parent AdminLayout.
+    setIsLoading(false);
+  }, []);
 
   const fetchDashboardStats = () => {
     setIsLoading(true);
@@ -51,10 +40,6 @@ export default function AdminDashboardPage() {
         <p className="mt-4 text-lg font-medium text-gray-600 dark:text-gray-300">Loading dashboard...</p>
       </div>
     );
-  }
-
-  if (!isAuthenticated) {
-    return null;
   }
 
   return (

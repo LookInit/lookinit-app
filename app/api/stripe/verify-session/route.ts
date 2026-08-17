@@ -2,7 +2,7 @@ export const runtime = 'nodejs'; // This is crucial - must be at the top
 
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { createOrUpdateUserSubscription } from '@/lib/db';
+import { upsertUserSubscription } from '@/lib/db';
 import { getAdminAuth, getAdminDb} from '@/lib/firebase-admin';
 
 // Check if we're in the build phase
@@ -59,8 +59,8 @@ export async function POST(request: Request) {
     // Get subscription details
     const subscription = await stripe.subscriptions.retrieve(subscriptionId);
     
-    // Store subscription data in your database
-    await createOrUpdateUserSubscription({
+    // Store subscription data in your database (same path getUserSubscription reads from)
+    await upsertUserSubscription({
       userId,
       customerId,
       subscriptionId,

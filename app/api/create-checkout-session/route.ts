@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { CONFIG } from '@/lib/config';
+import { verifyIdToken } from '@/app/api/search-history/auth-utils';
 
 const stripe = new Stripe(process.env.STRIPE_API_KEY!, {
   apiVersion: '2025-02-24.acacia',
@@ -8,12 +9,19 @@ const stripe = new Stripe(process.env.STRIPE_API_KEY!, {
 
 export async function POST(req: Request) {
   try {
-    const { planId, userId, source } = await req.json();
-    
-    if (!userId) {
-      return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
+    const authHeader = req.headers.get('authorization');
+    const idToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+    if (!idToken) {
+      return NextResponse.json({ error: 'Missing auth token' }, { status: 401 });
     }
-    
+    const decoded = await verifyIdToken(idToken);
+    if (!decoded) {
+      return NextResponse.json({ error: 'Invalid auth token' }, { status: 401 });
+    }
+    const userId = decoded.uid;
+
+    const { planId, source } = await req.json();
+
     // Define price IDs for each plan using config
     const priceIds: Record<string, string> = {
       basic: CONFIG.stripe.basicPriceId,
@@ -49,7 +57,7 @@ export async function POST(req: Request) {
         planId,
         source: source || 'website',
       },
-      customer_email: req.headers.get('x-user-email') || undefined,
+      customer_email: decoded.email || undefined,
     });
 
     return NextResponse.json({ sessionId: session.id, url: session.url });

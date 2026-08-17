@@ -10,22 +10,21 @@ export async function getAdminApp() {
 
   if (getApps().length === 0) {
     try {
-      console.log('Initializing Firebase Admin with:');
-      console.log('Project ID:', CONFIG.firebase.projectId);
-      console.log('Client Email:', CONFIG.firebase.clientEmail);
-      console.log('Private Key Length:', CONFIG.firebase.privateKey.length);
+      const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+      const privateKey = process.env.FIREBASE_PRIVATE_KEY;
+      if (!clientEmail || !privateKey) {
+        throw new Error('FIREBASE_CLIENT_EMAIL and FIREBASE_PRIVATE_KEY must be set');
+      }
 
       firebaseApp = initializeApp({
         credential: cert({
           projectId: CONFIG.firebase.projectId,
-          clientEmail: CONFIG.firebase.clientEmail,
-          privateKey: CONFIG.firebase.privateKey.replace(/\\n/g, '\n'),
+          clientEmail,
+          privateKey: privateKey.replace(/\\n/g, '\n'),
         }),
       });
-
-      console.log('✅ Firebase Admin initialized successfully');
     } catch (error) {
-      console.error('❌ Failed to initialize Firebase Admin:', error);
+      console.error('Failed to initialize Firebase Admin:', error);
       throw error;
     }
   } else {

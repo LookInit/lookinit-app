@@ -12,6 +12,7 @@ import {
   BlogPostInsert
 } from '@/types/post';
 import { validateBlogPost } from '@/utils/validators/blog';
+import { requireAdmin } from '@/lib/admin-auth';
 
 // Helper for error responses
 const errorResponse = (message: string, status: number) => {
@@ -63,11 +64,12 @@ export async function GET(request: Request): Promise<NextResponse<ApiResponse<Bl
 }
 
 export async function POST(request: Request): Promise<NextResponse<ApiResponse<BlogPost>>> {
+  if (!(await requireAdmin(request))) {
+    return errorResponse('Unauthorized', 401);
+  }
   try {
     const db = await getDb();
     const body: BlogPostCreateDTO = await request.json();
-
-    console.log('Incoming POST body:', body); // Debugging log
 
     // Validate input
     const validation = validateBlogPost(body);
@@ -111,6 +113,9 @@ export async function POST(request: Request): Promise<NextResponse<ApiResponse<B
 }
 
 export async function PUT(request: Request): Promise<NextResponse<ApiResponse<BlogPost>>> {
+  if (!(await requireAdmin(request))) {
+    return errorResponse('Unauthorized', 401);
+  }
   try {
     const db = await getDb();
     const { searchParams } = new URL(request.url);
@@ -158,11 +163,14 @@ export async function PUT(request: Request): Promise<NextResponse<ApiResponse<Bl
 }
 
 export async function DELETE(request: Request): Promise<NextResponse<ApiResponse>> {
+  if (!(await requireAdmin(request))) {
+    return errorResponse('Unauthorized', 401);
+  }
   try {
     const db = await getDb();
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
-    
+
     if (!id || !ObjectId.isValid(id)) {
       return errorResponse('Valid post ID is required', 400);
     }

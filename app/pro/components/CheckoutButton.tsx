@@ -2,26 +2,29 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { auth } from '@/lib/firebase';
 
 interface CheckoutButtonProps {
   planId: 'basic' | 'pro';
   userId: string;
 }
 
-export default function CheckoutButton({ planId, userId }: CheckoutButtonProps) {
+export default function CheckoutButton({ planId }: CheckoutButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleCheckout = async () => {
     setIsLoading(true);
-    
+
     try {
+      const idToken = await auth.currentUser?.getIdToken();
       const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(idToken ? { authorization: `Bearer ${idToken}` } : {}),
         },
-        body: JSON.stringify({ planId, userId }),
+        body: JSON.stringify({ planId }),
       });
       
       const data = await response.json();

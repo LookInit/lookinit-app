@@ -8,6 +8,12 @@ import { BlogModal } from './BlogModal'; // Ensure named import
 import { toast } from 'sonner';
 import {ObjectId} from 'mongodb';
 import { BlogPost } from '@/types/post';
+import { auth } from '@/lib/firebase';
+
+async function authHeaders(): Promise<HeadersInit> {
+  const idToken = await auth.currentUser?.getIdToken();
+  return idToken ? { authorization: `Bearer ${idToken}` } : {};
+}
 
 export default function BlogAdminPage() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -37,7 +43,7 @@ export default function BlogAdminPage() {
     try {
       const confirmed = window.confirm('Are you sure you want to delete this post?'); // Confirmation dialog
       if (!confirmed) return;
-      const response = await fetch(`/api/blog?id=${id}`, { method: 'DELETE' });
+      const response = await fetch(`/api/blog?id=${id}`, { method: 'DELETE', headers: await authHeaders() });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Failed to delete post');
       setPosts((prev) => prev.filter((post) => post._id.toString() !== id));
@@ -52,7 +58,7 @@ export default function BlogAdminPage() {
       const newStatus = post.status === 'published' ? 'draft' : 'published';
       const response = await fetch(`/api/blog?id=${post._id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(await authHeaders()) },
         body: JSON.stringify({ status: newStatus }),
       });
       const data = await response.json();

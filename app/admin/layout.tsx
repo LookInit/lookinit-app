@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 import { AdminSidebar } from '@/components/Admin/Sidebar';
 import { AdminHeader } from '@/components/Admin/Header';
 import { MobileSidebar } from '@/components/Admin/MobileSidebar';
@@ -16,12 +18,22 @@ export default function AdminLayout({
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('isAuthenticated'); // Check for token in localStorage
-    if (!token) {
-      router.push('/login'); // Redirect to login if no token is found
-    } else {
-      setIsAuthenticated(true); // Set authentication state
-    }
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        router.push('/login');
+        return;
+      }
+      const idToken = await user.getIdToken();
+      const res = await fetch('/api/admin/check', {
+        headers: { authorization: `Bearer ${idToken}` },
+      });
+      if (!res.ok) {
+        router.push('/login');
+        return;
+      }
+      setIsAuthenticated(true);
+    });
+    return () => unsubscribe();
   }, [router]);
 
   if (!isAuthenticated) {

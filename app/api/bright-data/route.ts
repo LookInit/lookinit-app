@@ -1,14 +1,47 @@
 import { NextRequest, NextResponse } from 'next/server';
+import dns from 'dns/promises';
+import net from 'net';
+
+function isPrivateIp(ip: string): boolean {
+    if (net.isIPv4(ip)) {
+        const [a, b] = ip.split('.').map(Number);
+        return (
+            a === 10 ||
+            a === 127 ||
+            (a === 169 && b === 254) ||
+            (a === 172 && b >= 16 && b <= 31) ||
+            (a === 192 && b === 168) ||
+            a === 0
+        );
+    }
+    // IPv6: loopback, link-local, unique local
+    return ip === '::1' || ip.startsWith('fe80:') || ip.startsWith('fc') || ip.startsWith('fd');
+}
+
+// ponytail: DNS-lookup check, not a proxy-level guard — a rebinding attack that
+// resolves differently between this check and the fetch() below still slips through.
+// Upgrade to a real egress proxy/allowlist if this endpoint becomes higher-value.
+async function assertPublicUrl(rawUrl: string): Promise<URL> {
+    const url = new URL(rawUrl);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+        throw new Error('Only http/https URLs are allowed');
+    }
+    const { address } = await dns.lookup(url.hostname);
+    if (isPrivateIp(address)) {
+        throw new Error('URL resolves to a private or internal address');
+    }
+    return url;
+}
 
 export async function POST(request: NextRequest) {
     try {
-        const { url, query } = await request.json();
+        const { url } = await request.json();
 
         if (!url) {
             return NextResponse.json({ error: 'URL is required' }, { status: 400 });
         }
 
-        console.log(`Scraping URL: ${url}`);
+        await assertPublicUrl(url);
 
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000);

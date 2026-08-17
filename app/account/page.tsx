@@ -14,11 +14,12 @@ export default function AccountPage() {
 
   useEffect(() => {
     if (!user) { setLoading(false); return; }
-    fetch('/api/stripe/get-subscription', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: user.uid }),
-    })
+    user.getIdToken().then((idToken) =>
+      fetch('/api/stripe/get-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', authorization: `Bearer ${idToken}` },
+      })
+    )
       .then((r) => r.ok ? r.json() : null)
       .then((data) => setSubscription(data?.subscription ?? null))
       .catch(() => {})
@@ -29,10 +30,10 @@ export default function AccountPage() {
     if (!user) return;
     setPortalLoading(true);
     try {
+      const idToken = await user.getIdToken();
       const res = await fetch('/api/stripe/create-portal-session', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.uid }),
+        headers: { 'Content-Type': 'application/json', authorization: `Bearer ${idToken}` },
       });
       const data = await res.json();
       if (data.url) window.location.href = data.url;

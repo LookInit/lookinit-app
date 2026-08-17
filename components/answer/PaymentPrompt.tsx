@@ -57,15 +57,15 @@ const PaymentPrompt = () => {
 
     setLoadingPlan(planId);
     try {
+      const idToken = await currentUser.getIdToken();
       const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-user-email': currentUser.email || '',
+          authorization: `Bearer ${idToken}`,
         },
         body: JSON.stringify({
           planId,
-          userId: currentUser.uid,
           source: 'search_limit',
         }),
       });

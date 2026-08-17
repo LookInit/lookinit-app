@@ -14,8 +14,12 @@ import Spotify from '@/components/answer/Spotify';
 import ImageGenerationComponent from '@/components/answer/ImageGenerationComponent';
 import PaymentPrompt from '@/components/answer/PaymentPrompt';
 import dynamic from 'next/dynamic';
+import { mentionToolConfig } from '@/app/tools/mentionToolConfig';
 
 const MapComponent = dynamic(() => import('@/components/answer/Map'), { ssr: false });
+
+const isImageGenTool = (logo: string | undefined) =>
+  !!logo && mentionToolConfig.mentionTools.find((t) => t.logo === logo)?.functionName === 'falAiStableDiffusion3Medium';
 
 interface ChatContainerProps {
   messages: Message[];
@@ -24,11 +28,10 @@ interface ChatContainerProps {
   handleFollowUpClick: (question: string) => void;
 }
 
-export function ChatContainer({ 
-  messages, 
-  currentLlmResponse, 
-  selectedMentionTool, 
-  handleFollowUpClick 
+export function ChatContainer({
+  messages,
+  currentLlmResponse,
+  handleFollowUpClick
 }: ChatContainerProps) {
   if (messages.length === 0) {
     return null;
@@ -43,7 +46,7 @@ export function ChatContainer({
               <PaymentPrompt />
             </div>
           ) : message.isolatedView ? (
-            selectedMentionTool === 'fal-ai/stable-diffusion-v3-medium' || message.falBase64Image ? (
+            isImageGenTool(message.logo) || message.falBase64Image ? (
               <ImageGenerationComponent 
                 key={`image-${index}`} 
                 src={message.falBase64Image} 

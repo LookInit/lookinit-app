@@ -20,12 +20,15 @@ export const mentionFunctions: MentionFunctions = {
 
 export async function lookupTool(mentionTool: string, userMessage: string, streamable: any, file?: string): Promise<void> {
     const toolInfo = mentionToolConfig.mentionTools.find(tool => tool.id === mentionTool);
-    if (toolInfo) {
-        if (file) {
-            const decodedFile = await Buffer.from(file, 'base64').toString('utf-8').replace(/^data:image\/\w+;base64,/, '');
-            await mentionFunctions[toolInfo.functionName](mentionTool, userMessage + "File Content: " + decodedFile, streamable);
-        } else {
-            await mentionFunctions[toolInfo.functionName](mentionTool, userMessage, streamable);
-        }
+    if (!toolInfo) {
+        streamable.done({ llmResponseEnd: true });
+        return;
+    }
+    if (file) {
+        const base64Data = file.replace(/^data:[^;]+;base64,/, '');
+        const decodedFile = Buffer.from(base64Data, 'base64').toString('utf-8');
+        await mentionFunctions[toolInfo.functionName](mentionTool, userMessage + "File Content: " + decodedFile, streamable);
+    } else {
+        await mentionFunctions[toolInfo.functionName](mentionTool, userMessage, streamable);
     }
 }

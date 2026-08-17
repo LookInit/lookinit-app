@@ -17,12 +17,13 @@ export function useAuth() {
 
       if (currentUser) {
         try {
+          const idToken = await currentUser.getIdToken();
           const response = await fetch('/api/stripe/get-subscription', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
+              authorization: `Bearer ${idToken}`,
             },
-            body: JSON.stringify({ userId: currentUser.uid }),
           });
 
           if (response.ok) {

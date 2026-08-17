@@ -20,8 +20,6 @@ const options = {
   // SSL/TLS options
   ssl: true,
   tls: true,
-  tlsAllowInvalidCertificates: true,
-  tlsAllowInvalidHostnames: true,
   // Retry options
   retryWrites: true,
   retryReads: true,

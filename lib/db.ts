@@ -18,22 +18,6 @@ export interface UserSubscription {
   updatedAt: number;
 }
 
-export async function createOrUpdateUserSubscription(data: any) {
-  try {
-    const db = await getAdminDb();
-    if (!db) return false;
-    
-    const userRef = db.collection('users').doc(data.userId);
-    const subscriptionRef = userRef.collection('subscriptions').doc(data.subscriptionId);
-    
-    await subscriptionRef.set(data, { merge: true });
-    return true;
-  } catch (error) {
-    console.error('Error updating subscription:', error);
-    return false;
-  }
-}
-
 export async function getUserSubscription(userId: string): Promise<UserSubscription | null> {
   try {
     const db = await getAdminDb();

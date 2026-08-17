@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 import { FiLock, FiMail, FiArrowRight, FiEye, FiEyeOff } from 'react-icons/fi';
 
 export default function LoginPage() {
@@ -17,13 +19,20 @@ export default function LoginPage() {
     setError('');
     setIsLoading(true);
 
-    // Simulate network delay for premium feel
-    await new Promise(resolve => setTimeout(resolve, 800));
-    
-    if (email === 'hello@lookinit.com' && password === 'lookinit@123') {
-      localStorage.setItem('isAuthenticated', 'true');
+    try {
+      const { user } = await signInWithEmailAndPassword(auth, email, password);
+      const idToken = await user.getIdToken();
+      const checkRes = await fetch('/api/admin/check', {
+        headers: { authorization: `Bearer ${idToken}` },
+      });
+      if (!checkRes.ok) {
+        await signOut(auth);
+        setError('This account is not an admin.');
+        setIsLoading(false);
+        return;
+      }
       router.push('/admin');
-    } else {
+    } catch (err) {
       setError('Invalid email or password');
       setIsLoading(false);
     }
